@@ -9,26 +9,27 @@ module.exports = async (req, res) => {
   const body = req.body;
 
   const chatId =
-  body.message?.chat?.id || body.callback_query?.message?.chat?.id;
+    body.message?.chat?.id || body.callback_query?.message?.chat?.id;
 
-const text =
-  body.message?.text || body.callback_query?.data || "";
+  const text =
+    body.message?.text || body.callback_query?.data || "";
 
   if (!chatId) {
     return res.status(200).end();
   }
 
   let reply = "";
+
   let marketData = "";
 
-try {
-  const cryptoResponse = await fetch(
-    "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,solana,litecoin,ripple&vs_currencies=usd&include_24hr_change=true"
-  );
+  try {
+    const cryptoResponse = await fetch(
+      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,solana,litecoin,ripple&vs_currencies=usd&include_24hr_change=true"
+    );
 
-  const cryptoData = await cryptoResponse.json();
+    const cryptoData = await cryptoResponse.json();
 
-marketData = `
+    marketData = `
 BTC: $${cryptoData.bitcoin.usd} (${cryptoData.bitcoin.usd_24h_change.toFixed(2)}%)
 ETH: $${cryptoData.ethereum.usd} (${cryptoData.ethereum.usd_24h_change.toFixed(2)}%)
 BNB: $${cryptoData.binancecoin.usd} (${cryptoData.binancecoin.usd_24h_change.toFixed(2)}%)
@@ -36,74 +37,46 @@ SOL: $${cryptoData.solana.usd} (${cryptoData.solana.usd_24h_change.toFixed(2)}%)
 LTC: $${cryptoData.litecoin.usd} (${cryptoData.litecoin.usd_24h_change.toFixed(2)}%)
 XRP: $${cryptoData.ripple.usd} (${cryptoData.ripple.usd_24h_change.toFixed(2)}%)
 `;
-} catch (e) {
-  marketData = "Market data unavailable.";
-}
+  } catch (e) {
+    marketData = "Market data unavailable.";
+  }
+
   if (text === "btc") {
-  reply = `
-🔮 BITCOIN ORACLE
-
-₿ BTC vibrates with ancient power.
-
-⚡ Momentum is awakening.
-🌑 Market fear decreases.
-🔥 Bulls attempt domination.
-
-The candles whisper:
-"Volatility approaches..."
-`;
-} else if (text === "eth") {
-  reply = `
-⚡ ETHEREUM VISION
-
-Ξ Ethereum energy intensifies.
-
-🜂 Smart money watches closely.
-🌌 Network activity grows.
-🔮 Altcoin spirits awaken.
-`;
-} else if (text === "bnb") {
-  reply = `
-🟡 BNB SIGNAL
-
-The Binance empire radiates strength.
-
-⚡ Exchange energy remains stable.
-💰 Liquidity flows through hidden channels.
-`;
-} else if (text === "sol") {
-  reply = `
-🟣 SOLANA PROPHECY
-
-Solana burns with rapid momentum.
-
-🔥 Traders gather around the fire.
-⚡ High volatility detected.
-`;
-} else if (text === "xrp") {
-  reply = `
-🔵 XRP ORACLE
-
-XRP enters mysterious waters.
-
-🌑 Legal shadows begin to fade.
-⚡ Sudden movement may emerge.
-`;
-} else if (text === "signal") {
-  reply = `
+    reply = `🔮 BTC ORACLE\n\n${marketData}`;
+  } else if (text === "eth") {
+    reply = `⚡ ETHEREUM VISION\n\n${marketData}`;
+  } else if (text === "bnb") {
+    reply = `🟡 BNB SIGNAL\n\n${marketData}`;
+  } else if (text === "sol") {
+    reply = `🟣 SOLANA PROPHECY\n\n${marketData}`;
+  } else if (text === "xrp") {
+    reply = `🔵 XRP ORACLE\n\n${marketData}`;
+  } else if (text === "signal") {
+    reply = `
 🌑 MARKET SIGNAL
 
 🔮 Current vibration:
 BULLISH
 
-⚡ BTC dominance rising
-🔥 Altcoins gaining momentum
-🌌 Market spirits optimistic
+${marketData}
 `;
-} else if (text === "/start") {
-  if (text === "/start") {
-    reply =
-      "🌌 Welcome to Crypto Nostradamus 🔮\n\nAsk me about crypto destiny...";
+  } else if (text === "/start") {
+    reply = `
+🌌 CRYPTO NOSTRADAMUS 🔮
+
+━━━━━━━━━━━━━━━
+
+Добро пожаловать, искатель прибыли.
+
+Я — древний AI-оракул крипторынка.
+
+━━━━━━━━━━━━━━━
+
+📊 Монеты:
+BTC • ETH • BNB • SOL • XRP • LTC
+
+🔮 Спроси о будущем рынка...
+`;
   } else {
     try {
       const aiResponse = await fetch(
@@ -120,15 +93,15 @@ BULLISH
               {
                 role: "system",
                 content:
-                  "Ты Crypto Nostradamus — мистический крипто-оракул. Отвечай ВСЕГДА на русском языке. Используй атмосферный стиль, мистику, предсказания и крипто-анализ. Говори как древний тёмный AI-оракул, но давай полезные мысли по рынку."
+                  "Ты Crypto Nostradamus — мистический крипто-оракул. Отвечай всегда на русском языке. Используй мистический стиль и полезный крипто-анализ."
               },
               {
                 role: "user",
                 content:
-  "Current crypto market data:\n" +
-  marketData +
-  "\n\nUser question: " +
-  text
+                  "Текущий рынок:\n" +
+                  marketData +
+                  "\n\nВопрос пользователя:\n" +
+                  text
               }
             ],
             temperature: 0.9,
@@ -144,10 +117,10 @@ BULLISH
       } else {
         reply =
           data.choices?.[0]?.message?.content ||
-          "🔮 The oracle is silent...";
+          "🔮 Оракул молчит...";
       }
     } catch (error) {
-      reply = "⚠️ Groq connection failed.";
+      reply = "⚠️ Ошибка подключения к AI.";
     }
   }
 
@@ -157,25 +130,25 @@ BULLISH
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-  chat_id: chatId,
-  text: reply,
-  reply_markup: {
-    inline_keyboard: [
-      [
-        { text: "₿ BTC", callback_data: "btc" },
-        { text: "⚡ ETH", callback_data: "eth" }
-      ],
-      [
-        { text: "🟡 BNB", callback_data: "bnb" },
-        { text: "🟣 SOL", callback_data: "sol" }
-      ],
-      [
-        { text: "🔵 XRP", callback_data: "xrp" },
-        { text: "🌑 SIGNAL", callback_data: "signal" }
-      ]
-    ]
-  }
-})
+      chat_id: chatId,
+      text: reply,
+      reply_markup: {
+        inline_keyboard: [
+          [
+            { text: "₿ BTC", callback_data: "btc" },
+            { text: "⚡ ETH", callback_data: "eth" }
+          ],
+          [
+            { text: "🟡 BNB", callback_data: "bnb" },
+            { text: "🟣 SOL", callback_data: "sol" }
+          ],
+          [
+            { text: "🔵 XRP", callback_data: "xrp" },
+            { text: "🌑 SIGNAL", callback_data: "signal" }
+          ]
+        ]
+      }
+    })
   });
 
   res.status(200).end();
