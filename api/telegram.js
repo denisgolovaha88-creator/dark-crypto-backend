@@ -1,5 +1,5 @@
 module.exports = async (req, res) => {
-  const token = process.env.BOT_TOKEN;
+  const token = 8821653271:AAEHIe7QhmcOOjxQFJ6DT5WPjZU9hczuVP8
 
   if (req.method !== "POST") {
     return res.status(200).send("Dark Crypto Oracle online 🔮");
