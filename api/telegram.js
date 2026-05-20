@@ -47,9 +47,15 @@ module.exports = async (req, res) => {
 
       const data = await aiResponse.json();
 
-      reply =
-        data.candidates?.[0]?.content?.parts?.[0]?.text ||
-        "🔮 The oracle is silent...";
+      if (data.error) {
+  reply = "GEMINI ERROR: " + data.error.message;
+} else {
+  reply =
+    data.candidates?.[0]?.content?.parts?.[0]?.text ||
+    "🔮 The oracle is silent...";
+}
+        
+      
     } catch (error) {
       reply = "⚠️ Gemini connection failed.";
     }
