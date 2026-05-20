@@ -21,13 +21,13 @@ module.exports = async (req, res) => {
   let reply = "";
 
   let marketData = "";
-
+  let cryptoData = {};
   try {
     const cryptoResponse = await fetch(
       "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,solana,litecoin,ripple&vs_currencies=usd&include_24hr_change=true"
     );
 
-    const cryptoData = await cryptoResponse.json();
+    cryptoData = await cryptoResponse.json();
 
     marketData = `
 BTC: $${cryptoData.bitcoin.usd} (${cryptoData.bitcoin.usd_24h_change.toFixed(2)}%)
