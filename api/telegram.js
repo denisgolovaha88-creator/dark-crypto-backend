@@ -1,9 +1,9 @@
 module.exports = async (req, res) => {
   const telegramToken = "8821653271:AAEHIe7QhmcOOjxQFJ6DT5WPjZU9hczuVP8";
-  const openaiKey = "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";
+  const geminiKey = "AIzaSyCWMiHrZjQNP-djms-58yCXs_uXFK6V9J8";
 
   if (req.method !== "POST") {
-    return res.status(200).send("Dark Crypto Oracle online 🔮");
+    return res.status(200).send("Crypto Nostradamus online 🔮");
   }
 
   const body = req.body;
@@ -23,44 +23,35 @@ module.exports = async (req, res) => {
   } else {
     try {
       const aiResponse = await fetch(
-        "https://api.openai.com/v1/chat/completions",
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${openaiKey}`
+            "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            model: "gpt-4o-mini",
-            messages: [
+            contents: [
               {
-                role: "system",
-                content:
-                  "You are Crypto Nostradamus, a mystical AI oracle for cryptocurrency traders. Speak with dark mystical energy, but still give useful insights."
-              },
-              {
-                role: "user",
-                content: text
+                parts: [
+                  {
+                    text:
+                      "You are Crypto Nostradamus, a mystical crypto oracle AI. Reply with dark mystical style but useful crypto insight. User message: " +
+                      text
+                  }
+                ]
               }
-            ],
-            max_tokens: 200
+            ]
           })
         }
       );
 
       const data = await aiResponse.json();
 
-      if (data.error) {
-  reply = "OPENAI ERROR: " + data.error.message;
-} else {
-  reply =
-    data.choices?.[0]?.message?.content ||
-    "🔮 The oracle is silent...";
-}
-        
-        
+      reply =
+        data.candidates?.[0]?.content?.parts?.[0]?.text ||
+        "🔮 The oracle is silent...";
     } catch (error) {
-      reply = "⚠️ The mystical connection was interrupted.";
+      reply = "⚠️ Gemini connection failed.";
     }
   }
 
