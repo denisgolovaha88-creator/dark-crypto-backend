@@ -1,5 +1,6 @@
 module.exports = async (req, res) => {
-  const token = "8821653271:AAEHIe7QhmcOOjxQFJ6DT5WPjZU9hczuVP8";
+  const telegramToken = "8821653271:AAEHIe7QhmcOOjxQFJ6DT5WPjZU9hczuVP8";
+  const openaiKey = "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";
 
   if (req.method !== "POST") {
     return res.status(200).send("Dark Crypto Oracle online 🔮");
@@ -18,32 +19,46 @@ module.exports = async (req, res) => {
 
   if (text === "/start") {
     reply =
-      "🌌 Welcome to Dark Crypto Oracle 🔮\n\nAsk me about crypto destiny...";
-  } else if (text.toLowerCase().includes("btc")) {
-    reply =
-      "🔮 Bitcoin walks through shadows...\n\nA powerful move may come soon.";
-  } else if (text.toLowerCase().includes("eth")) {
-    reply =
-      "⚡ Ethereum energy grows stronger.\n\nThe charts whisper bullish signs.";
-  } else if (text.toLowerCase().includes("sol")) {
-    reply =
-      "☀️ Solana shines brightly today.\n\nMomentum spirits are awakening.";
+      "🌌 Welcome to Crypto Nostradamus 🔮\n\nAsk me about crypto destiny...";
   } else {
-    const mysticalReplies = [
-      "🌑 The crypto moon is uncertain tonight...",
-      "🔮 Ancient market spirits sense volatility.",
-      "⚡ A hidden signal approaches from the blockchain realm.",
-      "🌌 The candles whisper secrets of profit.",
-      "🜂 The oracle sees opportunity in darkness."
-    ];
+    try {
+      const aiResponse = await fetch(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${openaiKey}`
+          },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [
+              {
+                role: "system",
+                content:
+                  "You are Crypto Nostradamus, a mystical AI oracle for cryptocurrency traders. Speak with dark mystical energy, but still give useful insights."
+              },
+              {
+                role: "user",
+                content: text
+              }
+            ],
+            max_tokens: 200
+          })
+        }
+      );
 
-    reply =
-      mysticalReplies[
-        Math.floor(Math.random() * mysticalReplies.length)
-      ];
+      const data = await aiResponse.json();
+
+      reply =
+        data.choices?.[0]?.message?.content ||
+        "🔮 The oracle is silent...";
+    } catch (error) {
+      reply = "⚠️ The mystical connection was interrupted.";
+    }
   }
 
-  await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+  await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
