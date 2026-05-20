@@ -8,8 +8,11 @@ module.exports = async (req, res) => {
 
   const body = req.body;
 
-  const chatId = body.message?.chat?.id;
-  const text = body.message?.text || "";
+  const chatId =
+  body.message?.chat?.id || body.callback_query?.message?.chat?.id;
+
+const text =
+  body.message?.text || body.callback_query?.data || "";
 
   if (!chatId) {
     return res.status(200).end();
@@ -36,6 +39,68 @@ XRP: $${cryptoData.ripple.usd} (${cryptoData.ripple.usd_24h_change.toFixed(2)}%)
 } catch (e) {
   marketData = "Market data unavailable.";
 }
+  if (text === "btc") {
+  reply = `
+🔮 BITCOIN ORACLE
+
+₿ BTC vibrates with ancient power.
+
+⚡ Momentum is awakening.
+🌑 Market fear decreases.
+🔥 Bulls attempt domination.
+
+The candles whisper:
+"Volatility approaches..."
+`;
+} else if (text === "eth") {
+  reply = `
+⚡ ETHEREUM VISION
+
+Ξ Ethereum energy intensifies.
+
+🜂 Smart money watches closely.
+🌌 Network activity grows.
+🔮 Altcoin spirits awaken.
+`;
+} else if (text === "bnb") {
+  reply = `
+🟡 BNB SIGNAL
+
+The Binance empire radiates strength.
+
+⚡ Exchange energy remains stable.
+💰 Liquidity flows through hidden channels.
+`;
+} else if (text === "sol") {
+  reply = `
+🟣 SOLANA PROPHECY
+
+Solana burns with rapid momentum.
+
+🔥 Traders gather around the fire.
+⚡ High volatility detected.
+`;
+} else if (text === "xrp") {
+  reply = `
+🔵 XRP ORACLE
+
+XRP enters mysterious waters.
+
+🌑 Legal shadows begin to fade.
+⚡ Sudden movement may emerge.
+`;
+} else if (text === "signal") {
+  reply = `
+🌑 MARKET SIGNAL
+
+🔮 Current vibration:
+BULLISH
+
+⚡ BTC dominance rising
+🔥 Altcoins gaining momentum
+🌌 Market spirits optimistic
+`;
+} else if (text === "/start") {
   if (text === "/start") {
     reply =
       "🌌 Welcome to Crypto Nostradamus 🔮\n\nAsk me about crypto destiny...";
