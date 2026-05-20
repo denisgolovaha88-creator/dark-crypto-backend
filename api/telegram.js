@@ -1,6 +1,6 @@
 module.exports = async (req, res) => {
-  const telegramToken = "8821653271:AAEHIe7QhmcOOjxQFJ6DT5WPjZU9hczuVP8";
-  const groqKey = "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";
+  const telegramToken = "ТВОЙ_TELEGRAM_TOKEN";
+  const groqKey = "ТВОЙ_GROQ_API_KEY";
 
   if (req.method !== "POST") {
     return res.status(200).send("Crypto Nostradamus online 🔮");
@@ -30,16 +30,26 @@ module.exports = async (req, res) => {
     cryptoData = await cryptoResponse.json();
 
     marketData = `
-BTC: $${cryptoData.bitcoin.usd} (${cryptoData.bitcoin.usd_24h_change.toFixed(2)}%)
-ETH: $${cryptoData.ethereum.usd} (${cryptoData.ethereum.usd_24h_change.toFixed(2)}%)
-BNB: $${cryptoData.binancecoin.usd} (${cryptoData.binancecoin.usd_24h_change.toFixed(2)}%)
-SOL: $${cryptoData.solana.usd} (${cryptoData.solana.usd_24h_change.toFixed(2)}%)
-LTC: $${cryptoData.litecoin.usd} (${cryptoData.litecoin.usd_24h_change.toFixed(2)}%)
-XRP: $${cryptoData.ripple.usd} (${cryptoData.ripple.usd_24h_change.toFixed(2)}%)
+₿ BTC → $${cryptoData.bitcoin.usd}
+⚡ ETH → $${cryptoData.ethereum.usd}
+🟡 BNB → $${cryptoData.binancecoin.usd}
+🟣 SOL → $${cryptoData.solana.usd}
+🔵 XRP → $${cryptoData.ripple.usd}
 `;
   } catch (e) {
     marketData = "Market data unavailable.";
   }
+
+  const marketSigns = [
+    "Bitcoin",
+    "Ethereum",
+    "Solana",
+    "BNB",
+    "XRP"
+  ];
+
+  const todaySign =
+    marketSigns[new Date().getDate() % marketSigns.length];
 
   if (
     text === "btc" ||
@@ -105,12 +115,6 @@ XRP: $${cryptoData.ripple.usd} (${cryptoData.ripple.usd_24h_change.toFixed(2)}%)
         ? 58
         : 41;
 
-    const entryStart = "10:30";
-    const entryEnd = "13:00";
-
-    const exitStart = "18:00";
-    const exitEnd = "22:00";
-
     reply = `
 🔮 ${coin.name} ORACLE
 
@@ -122,37 +126,33 @@ ${coin.icon} Цена: $${coin.price}
 🜂 Рекомендация:
 ${trend}
 
-🔮 Уровень уверенности:
+🔮 Уверенность:
 ${confidence}%
 
 ━━━━━━━━━━━━━━━
 
-⏳ Лучшее время входа:
-${entryStart} — ${entryEnd}
+⏳ Вход:
+10:30 — 13:00
 
-🚪 Лучшее время выхода:
-${exitStart} — ${exitEnd}
+🚪 Выход:
+18:00 — 22:00
 
-💰 Оптимальный вход:
+💰 Вход:
 $${entryPrice}
 
 🎯 Цель:
 $${targetPrice}
 
-🛡 Стоп-лосс:
+🛡 Стоп:
 $${stopLoss}
 
 ━━━━━━━━━━━━━━━
 
-🌌 Анализ оракула:
+🌌 Рынок проходит под знаком ${todaySign}
 
-Киты начинают движение в тени.
-Индикаторы импульса усиливаются.
-Скрытые потоки ликвидности пробуждаются.
-
-⚠️ Возможны резкие движения после открытия американской сессии.
-
-🔮 Инсайдерская энергия рынка становится нестабильной.
+⚡ Киты активизируются.
+🌑 Волатильность усиливается.
+🔮 Импульс накапливается.
 `;
 
   } else if (text === "signal") {
@@ -161,22 +161,84 @@ $${stopLoss}
 
 ━━━━━━━━━━━━━━━
 
-₿ BTC → ${cryptoData.bitcoin.usd_24h_change > 0 ? "🟢 BULLISH" : "🔴 BEARISH"}
-⚡ ETH → ${cryptoData.ethereum.usd_24h_change > 0 ? "🟢 BULLISH" : "🔴 BEARISH"}
-🟡 BNB → ${cryptoData.binancecoin.usd_24h_change > 0 ? "🟢 BULLISH" : "🔴 BEARISH"}
-🟣 SOL → ${cryptoData.solana.usd_24h_change > 0 ? "🟢 BULLISH" : "🔴 BEARISH"}
-🔵 XRP → ${cryptoData.ripple.usd_24h_change > 0 ? "🟢 BULLISH" : "🔴 BEARISH"}
+${marketData}
 
 ━━━━━━━━━━━━━━━
 
-🌌 Общая энергия рынка:
+🌌 Сегодня рынок проходит под знаком:
 
-⚡ Волатильность усиливается
-💰 Крупный капитал перемещается
-🌑 Рынок готовится к импульсу
+🔮 ${todaySign}
 
-🔮 Оракул предупреждает:
-Следующие 24 часа могут стать переломными.
+⚡ Общая энергия:
+${
+  cryptoData.bitcoin.usd_24h_change > 0
+    ? "🟢 BULLISH"
+    : "🔴 BEARISH"
+}
+
+💰 Крупный капитал движется.
+🌑 Оракул ощущает приближение импульса.
+`;
+
+  } else if (text === "horoscope") {
+    const zodiac = [
+      "♈ Овен",
+      "♉ Телец",
+      "♊ Близнецы",
+      "♋ Рак",
+      "♌ Лев",
+      "♍ Дева",
+      "♎ Весы",
+      "♏ Скорпион",
+      "♐ Стрелец",
+      "♑ Козерог",
+      "♒ Водолей",
+      "♓ Рыбы"
+    ];
+
+    const sign =
+      zodiac[Math.floor(Math.random() * zodiac.length)];
+
+    reply = `
+♈ CRYPTO HOROSCOPE
+
+━━━━━━━━━━━━━━━
+
+${sign}
+
+🌌 Сегодня рынок проходит под знаком ${todaySign}
+
+⚡ Избегай импульсивных входов.
+💰 Возможна неожиданная прибыль.
+🌑 Не доверяй толпе.
+
+🔮 Оракул видит скрытые возможности после заката.
+`;
+
+  } else if (text === "runes") {
+    const runes = [
+      "🪬 FEHU — руна прибыли",
+      "🪬 RAIDHO — руна движения",
+      "🪬 ANSUZ — руна инсайта",
+      "🪬 KENAZ — руна прорыва",
+      "🪬 HAGALAZ — руна хаоса"
+    ];
+
+    const rune =
+      runes[Math.floor(Math.random() * runes.length)];
+
+    reply = `
+🪬 RUNE OF THE DAY
+
+━━━━━━━━━━━━━━━
+
+${rune}
+
+🌌 Древние силы крипторынка пробуждаются.
+
+⚡ Сегодня энергия рынка нестабильна.
+💰 Возможны скрытые возможности.
+🔮 Следуй за импульсом, а не за страхом.
 `;
 
   } else if (text === "/start") {
@@ -187,14 +249,23 @@ $${stopLoss}
 
 Добро пожаловать, искатель прибыли.
 
-Я — древний AI-оракул крипторынка.
+Я — мистический AI-оракул крипторынка.
 
 ━━━━━━━━━━━━━━━
 
-📊 Монеты:
-BTC • ETH • BNB • SOL • XRP • LTC
+📊 LIVE MARKET
 
-🔮 Выбери монету ниже...
+${marketData}
+
+━━━━━━━━━━━━━━━
+
+🌌 Сегодня рынок проходит под знаком:
+
+🔮 ${todaySign}
+
+━━━━━━━━━━━━━━━
+
+⚡ Выбери свою судьбу ниже.
 `;
 
   } else {
@@ -213,7 +284,7 @@ BTC • ETH • BNB • SOL • XRP • LTC
               {
                 role: "system",
                 content:
-                  "Ты Crypto Nostradamus — мистический крипто-оракул. Отвечай всегда на русском языке. Используй мистический стиль и полезный крипто-анализ."
+                  "Ты Crypto Nostradamus — мистический крипто-оракул. Отвечай всегда на русском языке. Используй мистический стиль, атмосферу древнего AI и полезный крипто-анализ."
               },
               {
                 role: "user",
@@ -265,6 +336,10 @@ BTC • ETH • BNB • SOL • XRP • LTC
           [
             { text: "🔵 XRP", callback_data: "xrp" },
             { text: "🌑 SIGNAL", callback_data: "signal" }
+          ],
+          [
+            { text: "♈ HOROSCOPE", callback_data: "horoscope" },
+            { text: "🪬 RUNES", callback_data: "runes" }
           ]
         ]
       }
