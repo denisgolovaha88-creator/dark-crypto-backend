@@ -50,9 +50,15 @@ module.exports = async (req, res) => {
 
       const data = await aiResponse.json();
 
-      reply =
-        data.choices?.[0]?.message?.content ||
-        "🔮 The oracle is silent...";
+      if (data.error) {
+  reply = "OPENAI ERROR: " + data.error.message;
+} else {
+  reply =
+    data.choices?.[0]?.message?.content ||
+    "🔮 The oracle is silent...";
+}
+        
+        
     } catch (error) {
       reply = "⚠️ The mystical connection was interrupted.";
     }
