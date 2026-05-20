@@ -16,7 +16,26 @@ module.exports = async (req, res) => {
   }
 
   let reply = "";
+  let marketData = "";
 
+try {
+  const cryptoResponse = await fetch(
+    "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,solana,litecoin,ripple&vs_currencies=usd&include_24hr_change=true"
+  );
+
+  const cryptoData = await cryptoResponse.json();
+
+marketData = `
+BTC: $${cryptoData.bitcoin.usd} (${cryptoData.bitcoin.usd_24h_change.toFixed(2)}%)
+ETH: $${cryptoData.ethereum.usd} (${cryptoData.ethereum.usd_24h_change.toFixed(2)}%)
+BNB: $${cryptoData.binancecoin.usd} (${cryptoData.binancecoin.usd_24h_change.toFixed(2)}%)
+SOL: $${cryptoData.solana.usd} (${cryptoData.solana.usd_24h_change.toFixed(2)}%)
+LTC: $${cryptoData.litecoin.usd} (${cryptoData.litecoin.usd_24h_change.toFixed(2)}%)
+XRP: $${cryptoData.ripple.usd} (${cryptoData.ripple.usd_24h_change.toFixed(2)}%)
+`;
+} catch (e) {
+  marketData = "Market data unavailable.";
+}
   if (text === "/start") {
     reply =
       "🌌 Welcome to Crypto Nostradamus 🔮\n\nAsk me about crypto destiny...";
@@ -40,7 +59,11 @@ module.exports = async (req, res) => {
               },
               {
                 role: "user",
-                content: text
+                content:
+  "Current crypto market data:\n" +
+  marketData +
+  "\n\nUser question: " +
+  text
               }
             ],
             temperature: 0.9,
