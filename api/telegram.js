@@ -92,7 +92,16 @@ XRP: $${cryptoData.ripple.usd} (${cryptoData.ripple.usd_24h_change.toFixed(2)}%)
   const entryPrice = (coin.price * 0.985).toFixed(2);
   const targetPrice = (coin.price * 1.06).toFixed(2);
   const stopLoss = (coin.price * 0.96).toFixed(2);
-
+  const confidence =
+  coin.change > 4
+    ? 91
+    : coin.change > 2
+    ? 82
+    : coin.change > 0
+    ? 74
+    : coin.change > -2
+    ? 58
+    : 41;
   const confidence =
     coin.change > 4
       ? 91
