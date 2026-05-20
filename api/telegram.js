@@ -41,79 +41,122 @@ XRP: $${cryptoData.ripple.usd} (${cryptoData.ripple.usd_24h_change.toFixed(2)}%)
     marketData = "Market data unavailable.";
   }
 
-  if (text === "btc") {
+  if if (
+  text === "btc" ||
+  text === "eth" ||
+  text === "bnb" ||
+  text === "sol" ||
+  text === "xrp"
+) {
+  const symbols = {
+    btc: {
+      name: "BITCOIN",
+      icon: "₿",
+      price: cryptoData.bitcoin.usd,
+      change: cryptoData.bitcoin.usd_24h_change
+    },
+    eth: {
+      name: "ETHEREUM",
+      icon: "⚡",
+      price: cryptoData.ethereum.usd,
+      change: cryptoData.ethereum.usd_24h_change
+    },
+    bnb: {
+      name: "BNB",
+      icon: "🟡",
+      price: cryptoData.binancecoin.usd,
+      change: cryptoData.binancecoin.usd_24h_change
+    },
+    sol: {
+      name: "SOLANA",
+      icon: "🟣",
+      price: cryptoData.solana.usd,
+      change: cryptoData.solana.usd_24h_change
+    },
+    xrp: {
+      name: "XRP",
+      icon: "🔵",
+      price: cryptoData.ripple.usd,
+      change: cryptoData.ripple.usd_24h_change
+    }
+  };
+
+  const coin = symbols[text];
+
+  const trend = coin.change > 2
+    ? "🟢 ПОКУПАТЬ"
+    : coin.change < -2
+    ? "🔴 ПРОДАВАТЬ"
+    : "🟡 НЕЙТРАЛЬНО";
+
+  const entryPrice = (coin.price * 0.985).toFixed(2);
+  const targetPrice = (coin.price * 1.06).toFixed(2);
+  const stopLoss = (coin.price * 0.96).toFixed(2);
+
+  const confidence =
+    coin.change > 4
+      ? 91
+      : coin.change > 2
+      ? 82
+      : coin.change > 0
+      ? 74
+      : coin.change > -2
+      ? 58
+      : 41;
+
+  const entryStart = "10:30";
+  const entryEnd = "13:00";
+
+  const exitStart = "18:00";
+  const exitEnd = "22:00";
+
   reply = `
-🔮 BITCOIN ORACLE
+🔮 ${coin.name} ORACLE
 
-₿ BTC: $${cryptoData.bitcoin.usd}
-⚡ 24h: ${cryptoData.bitcoin.usd_24h_change.toFixed(2)}%
+${coin.icon} Цена: $${coin.price}
+⚡ 24ч: ${coin.change.toFixed(2)}%
 
-🌌 Биткоин входит в зону высокой волатильности.
+━━━━━━━━━━━━━━━
 
-Тени рынка становятся нестабильными.
-Киты начинают движение в глубинах.
+🜂 Рекомендация:
+${trend}
 
-🔮 Оракул чувствует приближение сильного импульса.
+🔮 Уровень уверенности:
+${confidence}%
+
+━━━━━━━━━━━━━━━
+
+⏳ Лучшее время входа:
+${entryStart} — ${entryEnd}
+
+🚪 Лучшее время выхода:
+${exitStart} — ${exitEnd}
+
+💰 Оптимальный вход:
+$${entryPrice}
+
+🎯 Цель:
+$${targetPrice}
+
+🛡 Стоп-лосс:
+$${stopLoss}
+
+━━━━━━━━━━━━━━━
+
+🌌 Анализ оракула:
+
+Киты начинают движение в тени.
+Индикаторы импульса усиливаются.
+Скрытые потоки ликвидности пробуждаются.
+
+⚠️ Возможны резкие движения после открытия американской сессии.
+
+🔮 Инсайдерская энергия рынка становится нестабильной.
 `;
-} else if (text === "eth") {
-  reply = `
-⚡ ETHEREUM VISION
 
-Ξ ETH: $${cryptoData.ethereum.usd}
-⚡ 24h: ${cryptoData.ethereum.usd_24h_change.toFixed(2)}%
-
-🜂 Энергия Ethereum усиливается.
-
-Сеть оживает.
-Активность смарт-контрактов растёт.
-
-🌌 Альткоины начинают пробуждаться.
-`;
-} else if (text === "bnb") {
-  reply = `
-🟡 BNB SIGNAL
-
-🟡 BNB: $${cryptoData.binancecoin.usd}
-⚡ 24h: ${cryptoData.binancecoin.usd_24h_change.toFixed(2)}%
-
-🔥 Binance сохраняет доминирование.
-
-Ликвидность течёт через скрытые каналы.
-Рынок ощущает устойчивость BNB.
-
-🔮 Империя Binance пока стоит крепко.
-`;
-} else if (text === "sol") {
-  reply = `
-🟣 SOLANA PROPHECY
-
-🟣 SOL: $${cryptoData.solana.usd}
-⚡ 24h: ${cryptoData.solana.usd_24h_change.toFixed(2)}%
-
-⚡ Solana пылает высокой скоростью.
-
-Трейдеры собираются вокруг её энергии.
-Возможны резкие движения цены.
-
-🌌 Волатильность усиливается.
-`;
-} else if (text === "xrp") {
-  reply = `
-🔵 XRP ORACLE
-
-🔵 XRP: $${cryptoData.ripple.usd}
-⚡ 24h: ${cryptoData.ripple.usd_24h_change.toFixed(2)}%
-
-🌑 XRP движется в тумане неопределённости.
-
-Но древние сигналы начинают усиливаться.
-Рынок ожидает неожиданного импульса.
-
-🔮 Тишина перед движением.
-`;
 } else if (text === "signal") {
   reply = `
-🌑 MARKET SIGNAL
+🌑 GLOBAL MARKET SIGNAL
 
 ━━━━━━━━━━━━━━━
 
@@ -125,8 +168,16 @@ XRP: $${cryptoData.ripple.usd} (${cryptoData.ripple.usd_24h_change.toFixed(2)}%)
 
 ━━━━━━━━━━━━━━━
 
-🔮 Рыночная энергия постоянно меняется.
+🌌 Общая энергия рынка:
+
+⚡ Волатильность усиливается
+💰 Крупный капитал перемещается
+🌑 Рынок готовится к импульсу
+
+🔮 Оракул предупреждает:
+Следующие 24 часа могут стать переломными.
 `;
+
 } else if (text === "/start") {
     reply = `
 🌑 MARKET SIGNAL
