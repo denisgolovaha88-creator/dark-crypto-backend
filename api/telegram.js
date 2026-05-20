@@ -22,71 +22,38 @@ module.exports = async (req, res) => {
       "🌌 Welcome to Crypto Nostradamus 🔮\n\nAsk me about crypto destiny...";
   } else {
     try {
-      
-        const aiResponse = await fetch(
-  `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
-  {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      contents: [
+      const aiResponse = await fetch(
+        `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
         {
-          parts: [
-            {
-              text:
-                "You are Crypto Nostradamus, a mystical crypto oracle AI. Reply with dark mystical style but useful crypto insight. User message: " +
-                text
-            }
-          ]
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    text:
+                      "You are Crypto Nostradamus, a mystical crypto oracle AI. Reply with dark mystical style but useful crypto insight. User message: " +
+                      text
+                  }
+                ]
+              }
+            ]
+          })
         }
-      ]
-    })
-  }
-);
+      );
 
-const data = await aiResponse.json();
+      const data = await aiResponse.json();
 
-if (data.error) {
-  reply = "GEMINI ERROR: " + data.error.message;
-} else {
-  reply =
-    data.candidates?.[0]?.content?.parts?.[0]?.text ||
-    "🔮 The oracle is silent...";
-}
-    
-          
-  
-            
-          
-    
-          
-              
-                
-                  
-                    
-                      
-                      
-                  
-                
-              
-            
-          
-        
-      
-
-      
-
-    
-  
-
-  
-    
-    
-}
-        
-      
+      if (data.error) {
+        reply = "GEMINI ERROR: " + data.error.message;
+      } else {
+        reply =
+          data.candidates?.[0]?.content?.parts?.[0]?.text ||
+          "🔮 The oracle is silent...";
+      }
     } catch (error) {
       reply = "⚠️ Gemini connection failed.";
     }
