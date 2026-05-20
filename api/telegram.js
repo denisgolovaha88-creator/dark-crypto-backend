@@ -1,6 +1,6 @@
 module.exports = async (req, res) => {
   const telegramToken = "8821653271:AAEHIe7QhmcOOjxQFJ6DT5WPjZU9hczuVP8";
-  const geminiKey = "AIzaSyCWMiHrZjQNP-djms-58yCXs_uXFK6V9J8";
+  const groqKey = "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";
 
   if (req.method !== "POST") {
     return res.status(200).send("Crypto Nostradamus online 🔮");
@@ -23,24 +23,28 @@ module.exports = async (req, res) => {
   } else {
     try {
       const aiResponse = await fetch(
-        `https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
+        "https://api.groq.com/openai/v1/chat/completions",
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${groqKey}`
           },
           body: JSON.stringify({
-            contents: [
+            model: "llama-3.3-70b-versatile",
+            messages: [
               {
-                parts: [
-                  {
-                    text:
-                      "You are Crypto Nostradamus, a mystical crypto oracle AI. Reply with dark mystical style but useful crypto insight. User message: " +
-                      text
-                  }
-                ]
+                role: "system",
+                content:
+                  "You are Crypto Nostradamus, a mystical crypto oracle AI. Speak with dark mystical energy while giving useful crypto insights."
+              },
+              {
+                role: "user",
+                content: text
               }
-            ]
+            ],
+            temperature: 0.9,
+            max_tokens: 300
           })
         }
       );
@@ -48,14 +52,14 @@ module.exports = async (req, res) => {
       const data = await aiResponse.json();
 
       if (data.error) {
-        reply = "GEMINI ERROR: " + data.error.message;
+        reply = "GROQ ERROR: " + data.error.message;
       } else {
         reply =
-          data.candidates?.[0]?.content?.parts?.[0]?.text ||
+          data.choices?.[0]?.message?.content ||
           "🔮 The oracle is silent...";
       }
     } catch (error) {
-      reply = "⚠️ Gemini connection failed.";
+      reply = "⚠️ Groq connection failed.";
     }
   }
 
