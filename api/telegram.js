@@ -92,9 +92,25 @@ XRP: $${cryptoData.ripple.usd} (${cryptoData.ripple.usd_24h_change.toFixed(2)}%)
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      chat_id: chatId,
-      text: reply
-    })
+  chat_id: chatId,
+  text: reply,
+  reply_markup: {
+    inline_keyboard: [
+      [
+        { text: "₿ BTC", callback_data: "btc" },
+        { text: "⚡ ETH", callback_data: "eth" }
+      ],
+      [
+        { text: "🟡 BNB", callback_data: "bnb" },
+        { text: "🟣 SOL", callback_data: "sol" }
+      ],
+      [
+        { text: "🔵 XRP", callback_data: "xrp" },
+        { text: "🌑 SIGNAL", callback_data: "signal" }
+      ]
+    ]
+  }
+})
   });
 
   res.status(200).end();
