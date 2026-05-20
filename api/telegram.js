@@ -1,6 +1,6 @@
 module.exports = async (req, res) => {
   const telegramToken = "8821653271:AAEHIe7QhmcOOjxQFJ6DT5WPjZU9hczuVP8";
-  const openaiKey = "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";
+  const openaiKey = "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";
 
   if (req.method !== "POST") {
     return res.status(200).send("Dark Crypto Oracle online 🔮");
