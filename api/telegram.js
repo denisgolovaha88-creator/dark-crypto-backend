@@ -542,28 +542,28 @@ ${strongestCoin.name.toUpperCase()}
       zodiacPredictions[text] ||
       "🔮 Оракул не смог прочитать звёзды.";
 
-    } else {
+      } else if (text === "runes") {
 
-    const user = getUser(chatId);
+  const rune =
+    runes[
+      Math.floor(Math.random() * runes.length)
+    ];
 
-    const today =
-      new Date().toISOString().split("T")[0];
-
-    if (user.lastRuneDate === today) {
-
-      reply = `
-🪬 РУНА ДНЯ УЖЕ ПОЛУЧЕНА
+  reply = `
+🪬 РУНА ДНЯ
 
 ━━━━━━━━━━━━━━━
 
-${user.lastRune}
+${rune.name}
+
+${rune.text}
 
 ━━━━━━━━━━━━━━━
 
-🌌 Следующая руна станет доступна завтра.
+🌌 Руны древнего рынка открылись тебе.
 `;
 
-    } else {
+} else {
 
       const rune =
         runes[
