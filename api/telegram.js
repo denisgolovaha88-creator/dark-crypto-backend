@@ -578,9 +578,10 @@ https://t.me/ТВОЙ_БОТ
   } catch (e) {
 
     console.log(
-      "GLOBAL ERROR",
-      e
-    );
+  "GLOBAL ERROR",
+  e.message,
+  e.stack
+);
 
     return res
       .status(200)
