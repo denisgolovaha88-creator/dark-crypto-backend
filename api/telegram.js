@@ -13,7 +13,7 @@ module.exports = async (req, res) => {
     body.message?.chat?.id ||
     body.callback_query?.message?.chat?.id;
 
-  const text =
+  let text =
     body.message?.text ||
     body.callback_query?.data ||
     "";
