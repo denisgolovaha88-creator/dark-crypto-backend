@@ -8,8 +8,8 @@ const GROQ_API_KEY =
 const GNEWS_API_KEY =
   "ВСТАВЬ_СЮДА_GNEWS_КЛЮЧ";
 
-const CRYPTOCOMPARE_API_KEY =
-  "ВСТАВЬ_СЮДА_CRYPTOCOMPARE_КЛЮЧ";
+const COINDESK_API_KEY =
+  "ВСТАВЬ_СЮДА_COINDESK_КЛЮЧ";
 
 const bot = new TelegramBot(TOKEN);
 
