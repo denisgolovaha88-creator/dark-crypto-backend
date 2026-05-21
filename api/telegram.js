@@ -27,49 +27,63 @@ module.exports = async (req, res) => {
 
   try {
 
-    const response = await fetch(
+    const priceResponse = await fetch(
       "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,solana,ripple&vs_currencies=usd&include_24hr_change=true"
     );
 
-    cryptoData = await response.json();
+    cryptoData = await priceResponse.json();
 
-    const btcKlines = await fetch(
-      "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1h&limit=24"
-    );
+    async function loadChart(id) {
 
-    const ethKlines = await fetch(
-      "https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=1h&limit=24"
-    );
+      const response = await fetch(
+        `https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=usd&days=1`
+      );
 
-    const bnbKlines = await fetch(
-      "https://api.binance.com/api/v3/klines?symbol=BNBUSDT&interval=1h&limit=24"
-    );
-
-    const solKlines = await fetch(
-      "https://api.binance.com/api/v3/klines?symbol=SOLUSDT&interval=1h&limit=24"
-    );
-
-    const xrpKlines = await fetch(
-      "https://api.binance.com/api/v3/klines?symbol=XRPUSDT&interval=1h&limit=24"
-    );
+      return await response.json();
+    }
 
     marketData = {
-      btc: await btcKlines.json(),
-      eth: await ethKlines.json(),
-      bnb: await bnbKlines.json(),
-      sol: await solKlines.json(),
-      xrp: await xrpKlines.json()
+
+      btc: await loadChart("bitcoin"),
+
+      eth: await loadChart("ethereum"),
+
+      bnb: await loadChart("binancecoin"),
+
+      sol: await loadChart("solana"),
+
+      xrp: await loadChart("ripple")
     };
 
   } catch (e) {
 
-    cryptoData = {
-      bitcoin: { usd: 0, usd_24h_change: 0 },
-      ethereum: { usd: 0, usd_24h_change: 0 },
-      binancecoin: { usd: 0, usd_24h_change: 0 },
-      solana: { usd: 0, usd_24h_change: 0 },
-      ripple: { usd: 0, usd_24h_change: 0 }
-    };
+    console.log(e);
+
+    const reply = `
+⚠️ MARKET DATA ERROR
+
+CoinGecko временно недоступен.
+
+🌌 Оракул ожидает восстановления потоков данных...
+`;
+
+    await fetch(
+      `https://api.telegram.org/bot${telegramToken}/sendMessage`,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: reply
+        })
+      }
+    );
+
+    return res.status(200).end();
   }
 
   const coins = {
@@ -117,17 +131,18 @@ module.exports = async (req, res) => {
 
   function generateSignal(coin, symbol) {
 
-    const candles = marketData[symbol];
+    const prices =
+      marketData[symbol]?.prices || [];
 
-    if (!candles || !candles.length) {
+    if (!prices.length) {
 
       return `
 ⚠️ Анализ временно недоступен.
 `;
     }
 
-    const closes = candles.map(c =>
-      parseFloat(c[4])
+    const closes = prices.map(
+      p => p[1]
     );
 
     const first = closes[0];
@@ -136,31 +151,31 @@ module.exports = async (req, res) => {
     const trendPercent =
       ((last - first) / first) * 100;
 
-    const bullish = trendPercent > 0;
-
     const volatility =
       Math.max(...closes) -
       Math.min(...closes);
 
+    const bullish = trendPercent > 0;
+
     const confidence = Math.min(
-      97,
+      96,
       Math.max(
         52,
         Math.floor(
           55 +
-          Math.abs(trendPercent) * 6 +
-          (volatility / last) * 100
+          Math.abs(trendPercent) * 5 +
+          ((volatility / last) * 100)
         )
       )
     );
 
     let recommendation = "🟡 НЕЙТРАЛЬНО";
 
-    if (bullish && confidence > 75) {
+    if (bullish && confidence >= 75) {
       recommendation = "🟢 ПОКУПАТЬ";
     }
 
-    if (!bullish && confidence > 75) {
+    if (!bullish && confidence >= 75) {
       recommendation = "🔴 ПРОДАВАТЬ";
     }
 
@@ -176,12 +191,19 @@ module.exports = async (req, res) => {
       ? (last * 0.98).toFixed(2)
       : (last * 1.02).toFixed(2);
 
-    let entryTime = "15:00 — 18:00 UTC";
-    let exitTime = "20:00 — 00:00 UTC";
+    let entryTime =
+      "14:00 — 17:00 UTC";
 
-    if ((volatility / last) > 0.04) {
-      entryTime = "12:00 — 15:00 UTC";
-      exitTime = "18:00 — 22:00 UTC";
+    let exitTime =
+      "20:00 — 23:00 UTC";
+
+    if ((volatility / last) > 0.05) {
+
+      entryTime =
+        "11:00 — 14:00 UTC";
+
+      exitTime =
+        "18:00 — 21:00 UTC";
     }
 
     return `
@@ -230,10 +252,10 @@ $${stopLoss}
 ${strongestCoin.name}
 
 🌑 Анализ основан на:
-• Binance candles
-• Momentum
-• Volatility
+• Market momentum
 • Trend energy
+• Volatility
+• CoinGecko realtime data
 `;
   }
 
@@ -242,7 +264,7 @@ ${strongestCoin.name}
     zodiac_oven: `
 ♈ Овен
 
-⚡ BTC усиливает энергию роста.
+🔥 BTC усиливает энергию роста.
 
 💰 Благоприятны быстрые сделки.
 
@@ -442,8 +464,8 @@ ${strongestCoin.name}
 
 ${strongestCoin.name}
 
-⚡ Волатильность усиливается
-🌑 Momentum растёт
+⚡ Momentum усиливается
+🌑 Волатильность растёт
 `;
 
   } else if (text === "horoscope") {
@@ -651,11 +673,13 @@ ${text}
       },
 
       body: JSON.stringify({
+
         chat_id: chatId,
 
         text: reply,
 
         reply_markup: {
+
           inline_keyboard: [
 
             [
