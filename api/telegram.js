@@ -155,6 +155,60 @@ CoinGecko временно недоступен.
       (a, b) => b.change - a.change
     )[0];
 
+  function calculateEMA(prices, period) {
+
+    const multiplier =
+      2 / (period + 1);
+
+    let ema = prices[0];
+
+    for (let i = 1; i < prices.length; i++) {
+
+      ema =
+        (prices[i] - ema) *
+        multiplier +
+        ema;
+    }
+
+    return ema;
+  }
+
+  function calculateRSI(prices, period = 14) {
+
+    let gains = 0;
+    let losses = 0;
+
+    for (let i = 1; i <= period; i++) {
+
+      const difference =
+        prices[i] - prices[i - 1];
+
+      if (difference >= 0) {
+        gains += difference;
+      } else {
+        losses += Math.abs(difference);
+      }
+    }
+
+    const avgGain =
+      gains / period;
+
+    const avgLoss =
+      losses / period;
+
+    if (avgLoss === 0) {
+      return 100;
+    }
+
+    const rs =
+      avgGain / avgLoss;
+
+    return (
+      100 -
+      (100 / (1 + rs))
+    );
+  }
+
   function generateSignal(coin, symbol) {
 
     const prices =
@@ -181,37 +235,107 @@ CoinGecko временно недоступен.
       Math.max(...closes) -
       Math.min(...closes);
 
-    const bullish = trendPercent > 0;
+    const ema20 =
+      calculateEMA(
+        closes.slice(-20),
+        20
+      );
 
-    const confidence = Math.min(
-      96,
-      Math.max(
-        52,
-        Math.floor(
-          55 +
-          Math.abs(trendPercent) * 5 +
-          ((volatility / last) * 100)
-        )
+    const ema50 =
+      calculateEMA(
+        closes.slice(-50),
+        50
+      );
+
+    const rsi =
+      calculateRSI(
+        closes.slice(-15)
+      );
+
+    const bullish =
+      ema20 > ema50;
+
+    let recommendation =
+      "🟡 НЕЙТРАЛЬНО";
+
+    if (
+      bullish &&
+      rsi < 70
+    ) {
+      recommendation =
+        "🟢 ПОКУПАТЬ";
+    }
+
+    if (
+      !bullish &&
+      rsi > 40
+    ) {
+      recommendation =
+        "🔴 ПРОДАВАТЬ";
+    }
+
+    let confidence =
+      55;
+
+    if (bullish) {
+      confidence += 12;
+    }
+
+    if (rsi < 35 || rsi > 65) {
+      confidence += 10;
+    }
+
+    confidence += Math.min(
+      18,
+      Math.floor(
+        Math.abs(trendPercent)
       )
     );
 
-    let recommendation = "🟡 НЕЙТРАЛЬНО";
+    confidence = Math.min(
+      96,
+      confidence
+    );
 
-    if (bullish && confidence >= 75) {
-      recommendation = "🟢 ПОКУПАТЬ";
+    let marketMood =
+      "🌑 Рынок нестабилен";
+
+    if (
+      bullish &&
+      rsi < 70
+    ) {
+      marketMood =
+        "🔥 Бычья энергия усиливается";
     }
 
-    if (!bullish && confidence >= 75) {
-      recommendation = "🔴 ПРОДАВАТЬ";
+    if (
+      !bullish &&
+      rsi > 60
+    ) {
+      marketMood =
+        "⚠️ Медвежье давление растёт";
+    }
+
+    let rsiText =
+      "⚖️ Баланс рынка";
+
+    if (rsi < 30) {
+      rsiText =
+        "🟢 Актив перепродан";
+    }
+
+    if (rsi > 70) {
+      rsiText =
+        "🔴 Актив перекуплен";
     }
 
     const entryPrice = bullish
-      ? (last * 0.995).toFixed(2)
+      ? (last * 0.994).toFixed(2)
       : (last * 0.985).toFixed(2);
 
     const targetPrice = bullish
-      ? (last * 1.03).toFixed(2)
-      : (last * 0.97).toFixed(2);
+      ? (last * 1.035).toFixed(2)
+      : (last * 0.965).toFixed(2);
 
     const stopLoss = bullish
       ? (last * 0.98).toFixed(2)
@@ -223,7 +347,9 @@ CoinGecko временно недоступен.
     let exitTime =
       "20:00 — 23:00 UTC";
 
-    if ((volatility / last) > 0.05) {
+    if (
+      volatility / last > 0.05
+    ) {
 
       entryTime =
         "11:00 — 14:00 UTC";
@@ -245,6 +371,21 @@ ${trendPercent.toFixed(2)}%
 
 ⚡ Волатильность:
 ${volatility.toFixed(2)}
+
+━━━━━━━━━━━━━━━
+
+📊 RSI:
+${rsi.toFixed(2)}
+
+${rsiText}
+
+━━━━━━━━━━━━━━━
+
+⚡ EMA20:
+$${ema20.toFixed(2)}
+
+🌑 EMA50:
+$${ema50.toFixed(2)}
 
 ━━━━━━━━━━━━━━━
 
@@ -273,9 +414,21 @@ $${stopLoss}
 
 ━━━━━━━━━━━━━━━
 
+${marketMood}
+
 🌌 Сегодня рынок проходит под знаком:
 
 ${strongestCoin.name}
+
+━━━━━━━━━━━━━━━
+
+🌑 Анализ основан на:
+
+• RSI
+• EMA20
+• EMA50
+• Momentum
+• Volatility
 `;
   }
 
@@ -319,86 +472,6 @@ ${strongestCoin.name}
 💰 Благоприятно накопление.
 
 🍀 Удача: 74%
-`,
-
-    zodiac_lev: `
-♌ Лев
-
-🔥 BTC привлекает внимание китов.
-
-💰 Высока вероятность пампа.
-
-🍀 Удача: 88%
-`,
-
-    zodiac_deva: `
-♍ Дева
-
-🟡 День осторожных решений.
-
-💰 Не гонись за FOMO.
-
-🍀 Удача: 73%
-`,
-
-    zodiac_vesi: `
-♎ Весы
-
-⚡ ETH и SOL усиливают рынок.
-
-💰 Благоприятны swing-сделки.
-
-🍀 Удача: 84%
-`,
-
-    zodiac_scorp: `
-♏ Скорпион
-
-🌌 Волатильность усиливается.
-
-💰 Возможны скрытые движения китов.
-
-🍀 Удача: 79%
-`,
-
-    zodiac_strel: `
-♐ Стрелец
-
-🔥 День агрессивного рынка.
-
-⚡ Подходят короткие сделки.
-
-🍀 Удача: 77%
-`,
-
-    zodiac_kozerog: `
-♑ Козерог
-
-🟡 Рынок требует терпения.
-
-💰 Сильны накопительные позиции.
-
-🍀 Удача: 75%
-`,
-
-    zodiac_vodoley: `
-♒ Водолей
-
-🟣 Solana усиливает влияние.
-
-💰 Благоприятны вечерние сделки.
-
-🍀 Удача: 86%
-`,
-
-    zodiac_ribi: `
-♓ Рыбы
-
-🌌 Интуиция сегодня особенно сильна.
-
-💰 Возможен скрытый рост.
-
-🍀 Удача: 80%
 `
   };
 
@@ -485,66 +558,6 @@ ${strongestCoin.name}
 ${strongestCoin.name}
 `;
 
-  } else if (text === "horoscope") {
-
-    reply = `
-♈ КРИПТОГОРОСКОП
-
-Выбери знак 🔮
-`;
-
-    await fetch(
-      `https://api.telegram.org/bot${telegramToken}/sendMessage`,
-      {
-        method: "POST",
-
-        headers: {
-          "Content-Type": "application/json"
-        },
-
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: reply,
-          reply_markup: {
-            inline_keyboard: [
-              [
-                { text: "♈ Овен", callback_data: "zodiac_oven" },
-                { text: "♉ Телец", callback_data: "zodiac_telec" }
-              ],
-              [
-                { text: "♊ Близнецы", callback_data: "zodiac_bliz" },
-                { text: "♋ Рак", callback_data: "zodiac_rak" }
-              ],
-              [
-                { text: "♌ Лев", callback_data: "zodiac_lev" },
-                { text: "♍ Дева", callback_data: "zodiac_deva" }
-              ],
-              [
-                { text: "♎ Весы", callback_data: "zodiac_vesi" },
-                { text: "♏ Скорпион", callback_data: "zodiac_scorp" }
-              ],
-              [
-                { text: "♐ Стрелец", callback_data: "zodiac_strel" },
-                { text: "♑ Козерог", callback_data: "zodiac_kozerog" }
-              ],
-              [
-                { text: "♒ Водолей", callback_data: "zodiac_vodoley" },
-                { text: "♓ Рыбы", callback_data: "zodiac_ribi" }
-              ]
-            ]
-          }
-        })
-      }
-    );
-
-    return res.status(200).end();
-
-  } else if (text.startsWith("zodiac_")) {
-
-    reply =
-      zodiacPredictions[text] ||
-      "🔮 Звёзды скрыли ответ.";
-
   } else if (text === "runes") {
 
     const rune =
@@ -627,11 +640,6 @@ ${rune}
             ],
 
             [
-              {
-                text: "♈ HOROSCOPE",
-                callback_data: "horoscope"
-              },
-
               {
                 text: "🪬 RUNES",
                 callback_data: "runes"
