@@ -92,15 +92,29 @@ module.exports = async (req, res) => {
 
       fearGreed = await fearResponse.json();
 
-      const newsResponse = await fetch(
-        "https://min-api.cryptocompare.com/data/v2/news/?lang=EN"
-      );
+      try {
 
-      const newsJson =
-        await newsResponse.json();
+  const newsResponse = await fetch(
+    "https://min-api.cryptocompare.com/data/v2/news/?lang=EN"
+  );
 
-      newsData =
-        newsJson.Data?.slice(0, 5) || [];
+  const newsJson =
+    await newsResponse.json();
+
+  newsData =
+    newsJson.Data?.slice(0, 5) || [];
+
+} catch (e) {
+
+  console.log("NEWS ERROR", e);
+
+  newsData = [
+    {
+      title:
+        "🌌 Потоки новостей временно скрыты туманом"
+    }
+  ];
+}
 
       cache.cryptoData = cryptoData;
       cache.marketData = marketData;
