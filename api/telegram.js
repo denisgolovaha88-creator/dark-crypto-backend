@@ -9,342 +9,702 @@ module.exports = async (req, res) => {
   const body = req.body;
 
   const chatId =
-    body.message?.chat?.id || body.callback_query?.message?.chat?.id;
+    body.message?.chat?.id ||
+    body.callback_query?.message?.chat?.id;
 
   const text =
-    body.message?.text || body.callback_query?.data || "";
+    body.message?.text ||
+    body.callback_query?.data ||
+    "";
 
   if (!chatId) {
     return res.status(200).end();
   }
 
   let reply = "";
-  let marketData = "";
   let cryptoData = {};
 
   try {
-    const cryptoResponse = await fetch(
-      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,solana,litecoin,ripple&vs_currencies=usd&include_24hr_change=true"
+    const response = await fetch(
+      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,solana,ripple,litecoin&vs_currencies=usd&include_24hr_change=true"
     );
 
-    cryptoData = await cryptoResponse.json();
+    cryptoData = await response.json();
 
-    marketData = `
-₿ BTC → $${cryptoData.bitcoin.usd}
-⚡ ETH → $${cryptoData.ethereum.usd}
-🟡 BNB → $${cryptoData.binancecoin.usd}
-🟣 SOL → $${cryptoData.solana.usd}
-🔵 XRP → $${cryptoData.ripple.usd}
-`;
   } catch (e) {
-    marketData = "Market data unavailable.";
+    console.log(e);
   }
 
-  const marketSigns = [
-    "Bitcoin",
-    "Ethereum",
-    "Solana",
-    "BNB",
-    "XRP"
-  ];
+  const coins = {
+    btc: {
+      symbol: "₿",
+      name: "Bitcoin",
+      price: cryptoData.bitcoin?.usd || 0,
+      change: cryptoData.bitcoin?.usd_24h_change || 0
+    },
 
-  const todaySign =
-    marketSigns[new Date().getDate() % marketSigns.length];
+    eth: {
+      symbol: "⚡",
+      name: "Ethereum",
+      price: cryptoData.ethereum?.usd || 0,
+      change: cryptoData.ethereum?.usd_24h_change || 0
+    },
 
-  if (
-    text === "btc" ||
-    text === "eth" ||
-    text === "bnb" ||
-    text === "sol" ||
-    text === "xrp"
-  ) {
-    const symbols = {
-      btc: {
-        name: "BITCOIN",
-        icon: "₿",
-        price: cryptoData.bitcoin.usd,
-        change: cryptoData.bitcoin.usd_24h_change
-      },
-      eth: {
-        name: "ETHEREUM",
-        icon: "⚡",
-        price: cryptoData.ethereum.usd,
-        change: cryptoData.ethereum.usd_24h_change
-      },
-      bnb: {
-        name: "BNB",
-        icon: "🟡",
-        price: cryptoData.binancecoin.usd,
-        change: cryptoData.binancecoin.usd_24h_change
-      },
-      sol: {
-        name: "SOLANA",
-        icon: "🟣",
-        price: cryptoData.solana.usd,
-        change: cryptoData.solana.usd_24h_change
-      },
-      xrp: {
-        name: "XRP",
-        icon: "🔵",
-        price: cryptoData.ripple.usd,
-        change: cryptoData.ripple.usd_24h_change
-      }
-    };
+    bnb: {
+      symbol: "🟡",
+      name: "BNB",
+      price: cryptoData.binancecoin?.usd || 0,
+      change: cryptoData.binancecoin?.usd_24h_change || 0
+    },
 
-    const coin = symbols[text];
+    sol: {
+      symbol: "🟣",
+      name: "Solana",
+      price: cryptoData.solana?.usd || 0,
+      change: cryptoData.solana?.usd_24h_change || 0
+    },
 
-    const trend =
-      coin.change > 2
+    xrp: {
+      symbol: "🔵",
+      name: "XRP",
+      price: cryptoData.ripple?.usd || 0,
+      change: cryptoData.ripple?.usd_24h_change || 0
+    }
+  };
+
+  const strongestCoin =
+    Object.values(coins).sort(
+      (a, b) => b.change - a.change
+    )[0];
+
+  function generateSignal(coin) {
+
+    const confidence = Math.min(
+      95,
+      Math.max(
+        52,
+        Math.floor(
+          60 + Math.abs(coin.change) * 6
+        )
+      )
+    );
+
+    const bullish = coin.change > 0;
+
+    const recommendation =
+      confidence > 80
+        ? bullish
+          ? "🟢 СИЛЬНО ПОКУПАТЬ"
+          : "🔴 СИЛЬНО ПРОДАВАТЬ"
+        : bullish
         ? "🟢 ПОКУПАТЬ"
-        : coin.change < -2
-        ? "🔴 ПРОДАВАТЬ"
-        : "🟡 НЕЙТРАЛЬНО";
+        : "🟡 ОСТОРОЖНО";
 
-    const entryPrice = (coin.price * 0.985).toFixed(2);
-    const targetPrice = (coin.price * 1.06).toFixed(2);
-    const stopLoss = (coin.price * 0.96).toFixed(2);
+    const entryPrice = bullish
+      ? (coin.price * 0.992).toFixed(2)
+      : (coin.price * 0.978).toFixed(2);
 
-    const confidence =
-      coin.change > 4
-        ? 91
-        : coin.change > 2
-        ? 82
-        : coin.change > 0
-        ? 74
-        : coin.change > -2
-        ? 58
-        : 41;
+    const targetPrice = bullish
+      ? (coin.price * 1.045).toFixed(2)
+      : (coin.price * 0.95).toFixed(2);
 
-    reply = `
-🔮 ${coin.name} ORACLE
+    const stopLoss = bullish
+      ? (coin.price * 0.97).toFixed(2)
+      : (coin.price * 1.02).toFixed(2);
 
-${coin.icon} Цена: $${coin.price}
-⚡ 24ч: ${coin.change.toFixed(2)}%
+    const volatility = Math.abs(coin.change);
+
+    let entryTime = "14:00 — 16:00 UTC";
+    let exitTime = "20:00 — 23:00 UTC";
+
+    if (volatility > 5) {
+      entryTime = "12:00 — 15:00 UTC";
+      exitTime = "18:00 — 21:00 UTC";
+    }
+
+    if (volatility < 2) {
+      entryTime = "16:00 — 19:00 UTC";
+      exitTime = "22:00 — 01:00 UTC";
+    }
+
+    return `
+🔮 ${coin.name.toUpperCase()} ORACLE
+
+${coin.symbol} Цена:
+$${coin.price}
+
+⚡ 24ч:
+${coin.change.toFixed(2)}%
 
 ━━━━━━━━━━━━━━━
 
 🜂 Рекомендация:
-${trend}
+${recommendation}
 
 🔮 Уверенность:
 ${confidence}%
 
 ━━━━━━━━━━━━━━━
 
-⏳ Вход:
-10:30 — 13:00
-
-🚪 Выход:
-18:00 — 22:00
-
-💰 Вход:
+💰 Оптимальный вход:
 $${entryPrice}
+
+⏳ Лучшее время входа:
+${entryTime}
 
 🎯 Цель:
 $${targetPrice}
 
-🛡 Стоп:
+🚪 Лучшее время фиксации:
+${exitTime}
+
+🛡 Стоп-лосс:
 $${stopLoss}
-
-━━━━━━━━━━━━━━━
-
-🌌 Рынок проходит под знаком ${todaySign}
-
-⚡ Киты активизируются.
-🌑 Волатильность усиливается.
-🔮 Импульс накапливается.
-`;
-
-  } else if (text === "signal") {
-    reply = `
-🌑 GLOBAL MARKET SIGNAL
-
-━━━━━━━━━━━━━━━
-
-${marketData}
 
 ━━━━━━━━━━━━━━━
 
 🌌 Сегодня рынок проходит под знаком:
 
-🔮 ${todaySign}
+${strongestCoin.name.toUpperCase()}
 
-⚡ Общая энергия:
+⚡ Анализ импульса:
 ${
-  cryptoData.bitcoin.usd_24h_change > 0
-    ? "🟢 BULLISH"
-    : "🔴 BEARISH"
+  bullish
+    ? "Покупатели усиливают давление."
+    : "Рынок уходит в защитную фазу."
 }
 
-💰 Крупный капитал движется.
-🌑 Оракул ощущает приближение импульса.
+💰 Активность китов усиливается.
+
+🔮 Оракул ощущает приближение движения.
 `;
+  }
 
-  } else if (text === "horoscope") {
-    const zodiac = [
-      "♈ Овен",
-      "♉ Телец",
-      "♊ Близнецы",
-      "♋ Рак",
-      "♌ Лев",
-      "♍ Дева",
-      "♎ Весы",
-      "♏ Скорпион",
-      "♐ Стрелец",
-      "♑ Козерог",
-      "♒ Водолей",
-      "♓ Рыбы"
-    ];
+  const zodiacPredictions = {
+    zodiac_oven: `
+♈ Овен
 
-    const sign =
-      zodiac[Math.floor(Math.random() * zodiac.length)];
+⚡ Сегодня особенно сильны:
+BTC • SOL
 
-    reply = `
-♈ CRYPTO HOROSCOPE
+💰 Высокая вероятность импульсной прибыли.
 
-━━━━━━━━━━━━━━━
+🌑 Избегай входов после 22:00 UTC.
 
-${sign}
+🍀 Удача: 78%
+`,
 
-🌌 Сегодня рынок проходит под знаком ${todaySign}
+    zodiac_telec: `
+♉ Телец
 
-⚡ Избегай импульсивных входов.
-💰 Возможна неожиданная прибыль.
-🌑 Не доверяй толпе.
+🟡 Благоприятны:
+ETH • BNB
 
-🔮 Оракул видит скрытые возможности после заката.
-`;
+⚡ Рынок стабилизируется.
 
-  } else if (text === "runes") {
-    const runes = [
-      "🪬 FEHU — руна прибыли",
-      "🪬 RAIDHO — руна движения",
-      "🪬 ANSUZ — руна инсайта",
-      "🪬 KENAZ — руна прорыва",
-      "🪬 HAGALAZ — руна хаоса"
-    ];
+💰 Возможна прибыль на спокойных сделках.
 
-    const rune =
-      runes[Math.floor(Math.random() * runes.length)];
+🍀 Удача: 81%
+`,
 
-    reply = `
-🪬 RUNE OF THE DAY
+    zodiac_bliz: `
+♊ Близнецы
 
-━━━━━━━━━━━━━━━
+🟣 Сегодня рынок нестабилен.
 
-${rune}
+⚡ Подходят быстрые сделки.
 
-🌌 Древние силы крипторынка пробуждаются.
+🚫 Избегай XRP.
 
-⚡ Сегодня энергия рынка нестабильна.
-💰 Возможны скрытые возможности.
-🔮 Следуй за импульсом, а не за страхом.
-`;
+🍀 Удача: 69%
+`,
 
-  } else if (text === "/start") {
+    zodiac_rak: `
+♋ Рак
+
+🌌 День проходит под энергией Ethereum.
+
+💰 Хорошее время для накопления.
+
+⚡ Избегай эмоциональных входов.
+
+🍀 Удача: 74%
+`,
+
+    zodiac_lev: `
+♌ Лев
+
+🔥 Высокая вероятность сильного движения BTC.
+
+⚡ Сегодня можно рисковать осторожно.
+
+💰 Возможен мощный вечерний импульс.
+
+🍀 Удача: 88%
+`,
+
+    zodiac_deva: `
+♍ Дева
+
+🟡 День аналитики и осторожности.
+
+⚡ Подходят сделки по тренду.
+
+🚫 Не доверяй пампам.
+
+🍀 Удача: 73%
+`,
+
+    zodiac_vesi: `
+♎ Весы
+
+⚡ ETH и SOL усиливаются.
+
+💰 Благоприятны среднесрочные сделки.
+
+🌑 Возможны скрытые возможности.
+
+🍀 Удача: 84%
+`,
+
+    zodiac_scorp: `
+♏ Скорпион
+
+🌌 Волатильность возрастает.
+
+⚡ Возможны резкие движения.
+
+💰 Сегодня особенно активны киты.
+
+🍀 Удача: 79%
+`,
+
+    zodiac_strel: `
+♐ Стрелец
+
+🔥 День агрессивного рынка.
+
+⚡ Хорошо работают быстрые входы.
+
+🚫 Не держи позиции слишком долго.
+
+🍀 Удача: 77%
+`,
+
+    zodiac_kozerog: `
+♑ Козерог
+
+🟡 Рынок склонен к накоплению.
+
+💰 Хороший день для анализа.
+
+⚡ Не спеши с фиксацией прибыли.
+
+🍀 Удача: 75%
+`,
+
+    zodiac_vodoley: `
+♒ Водолей
+
+🟣 Solana усиливает своё влияние.
+
+⚡ Возможны неожиданные новости.
+
+💰 Благоприятны вечерние сделки.
+
+🍀 Удача: 86%
+`,
+
+    zodiac_ribi: `
+♓ Рыбы
+
+🌌 Интуиция сегодня особенно сильна.
+
+⚡ Подходят спокойные входы.
+
+💰 Рынок готовит скрытый импульс.
+
+🍀 Удача: 80%
+`
+  };
+
+  const runes = [
+    {
+      name: "ᚠ FEHU",
+      text:
+        "💰 Руна прибыли и финансового потока.\n\nСегодня особенно сильна энергия накопления."
+    },
+
+    {
+      name: "ᚱ RAIDHO",
+      text:
+        "⚡ Руна движения.\n\nРынок готовится к смене направления."
+    },
+
+    {
+      name: "ᚲ KENAZ",
+      text:
+        "🔥 Руна прорыва.\n\nВозможен неожиданный рост объёмов."
+    },
+
+    {
+      name: "ᚺ HAGALAZ",
+      text:
+        "🌑 Руна хаоса.\n\nСегодня рынок особенно волатилен."
+    },
+
+    {
+      name: "ᚨ ANSUZ",
+      text:
+        "🔮 Руна инсайта.\n\nВажная информация может изменить рынок."
+    }
+  ];
+
+  if (text === "/start") {
+
     reply = `
 🌌 CRYPTO NOSTRADAMUS 🔮
 
 ━━━━━━━━━━━━━━━
 
-Добро пожаловать, искатель прибыли.
+📊 LIVE MARKET
 
-Я — мистический AI-оракул крипторынка.
+₿ BTC → $${coins.btc.price}
+⚡ ETH → $${coins.eth.price}
+🟡 BNB → $${coins.bnb.price}
+🟣 SOL → $${coins.sol.price}
+🔵 XRP → $${coins.xrp.price}
 
 ━━━━━━━━━━━━━━━
 
-📊 LIVE MARKET
+🌌 День проходит под знаком:
 
-${marketData}
+${strongestCoin.name.toUpperCase()}
+
+⚡ Монета дня показывает
+самый сильный импульс рынка.
+
+━━━━━━━━━━━━━━━
+
+🔮 Выбери путь ниже.
+`;
+
+  } else if (text === "btc") {
+
+    reply = generateSignal(coins.btc);
+
+  } else if (text === "eth") {
+
+    reply = generateSignal(coins.eth);
+
+  } else if (text === "bnb") {
+
+    reply = generateSignal(coins.bnb);
+
+  } else if (text === "sol") {
+
+    reply = generateSignal(coins.sol);
+
+  } else if (text === "xrp") {
+
+    reply = generateSignal(coins.xrp);
+
+  } else if (text === "signal") {
+
+    reply = `
+🌑 GLOBAL MARKET SIGNAL
+
+━━━━━━━━━━━━━━━
+
+₿ BTC → ${coins.btc.change.toFixed(2)}%
+⚡ ETH → ${coins.eth.change.toFixed(2)}%
+🟡 BNB → ${coins.bnb.change.toFixed(2)}%
+🟣 SOL → ${coins.sol.change.toFixed(2)}%
+🔵 XRP → ${coins.xrp.change.toFixed(2)}%
 
 ━━━━━━━━━━━━━━━
 
 🌌 Сегодня рынок проходит под знаком:
 
-🔮 ${todaySign}
+${strongestCoin.name.toUpperCase()}
+
+⚡ Самая сильная монета дня:
+${strongestCoin.name}
+
+💰 Волатильность усиливается.
+
+🔮 Крипторынок готовится к движению.
+`;
+
+  } else if (text === "horoscope") {
+
+    reply = `
+♈ КРИПТОГОРОСКОП
 
 ━━━━━━━━━━━━━━━
 
-⚡ Выбери свою судьбу ниже.
+Выбери знак зодиака 🔮
+`;
+
+    await fetch(
+      `https://api.telegram.org/bot${telegramToken}/sendMessage`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: reply,
+
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: "♈ Овен",
+                  callback_data: "zodiac_oven"
+                },
+
+                {
+                  text: "♉ Телец",
+                  callback_data: "zodiac_telec"
+                }
+              ],
+
+              [
+                {
+                  text: "♊ Близнецы",
+                  callback_data: "zodiac_bliz"
+                },
+
+                {
+                  text: "♋ Рак",
+                  callback_data: "zodiac_rak"
+                }
+              ],
+
+              [
+                {
+                  text: "♌ Лев",
+                  callback_data: "zodiac_lev"
+                },
+
+                {
+                  text: "♍ Дева",
+                  callback_data: "zodiac_deva"
+                }
+              ],
+
+              [
+                {
+                  text: "♎ Весы",
+                  callback_data: "zodiac_vesi"
+                },
+
+                {
+                  text: "♏ Скорпион",
+                  callback_data: "zodiac_scorp"
+                }
+              ],
+
+              [
+                {
+                  text: "♐ Стрелец",
+                  callback_data: "zodiac_strel"
+                },
+
+                {
+                  text: "♑ Козерог",
+                  callback_data: "zodiac_kozerog"
+                }
+              ],
+
+              [
+                {
+                  text: "♒ Водолей",
+                  callback_data: "zodiac_vodoley"
+                },
+
+                {
+                  text: "♓ Рыбы",
+                  callback_data: "zodiac_ribi"
+                }
+              ]
+            ]
+          }
+        })
+      }
+    );
+
+    return res.status(200).end();
+
+  } else if (text.startsWith("zodiac_")) {
+
+    reply =
+      zodiacPredictions[text] ||
+      "🔮 Оракул не смог прочитать звёзды.";
+
+  } else if (text === "runes") {
+
+    const today =
+      new Date().toISOString().split("T")[0];
+
+    const userSeed =
+      parseInt(chatId.toString().slice(-3));
+
+    const runeIndex =
+      (today.length + userSeed) % runes.length;
+
+    const rune = runes[runeIndex];
+
+    reply = `
+🪬 РУНА ДНЯ
+
+━━━━━━━━━━━━━━━
+
+${rune.name}
+
+${rune.text}
+
+━━━━━━━━━━━━━━━
+
+🌌 Следующая руна будет доступна завтра.
 `;
 
   } else {
+
     try {
+
       const aiResponse = await fetch(
         "https://api.groq.com/openai/v1/chat/completions",
+
         {
           method: "POST",
+
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${groqKey}`
           },
+
           body: JSON.stringify({
             model: "llama-3.3-70b-versatile",
+
             messages: [
               {
                 role: "system",
+
                 content:
-                  "Ты Crypto Nostradamus — мистический крипто-оракул. Отвечай всегда на русском языке. Используй мистический стиль, атмосферу древнего AI и полезный крипто-анализ."
+                  "Ты Crypto Nostradamus — мистический крипто-оракул. Отвечай только на русском языке. Используй атмосферу mystical crypto terminal. Анализируй рынок серьёзно."
               },
+
               {
                 role: "user",
+
                 content:
                   "Текущий рынок:\n" +
-                  marketData +
-                  "\n\nВопрос пользователя:\n" +
+
+                  `
+BTC: ${coins.btc.price}
+ETH: ${coins.eth.price}
+BNB: ${coins.bnb.price}
+SOL: ${coins.sol.price}
+XRP: ${coins.xrp.price}
+` +
+
+                  "\n\nВопрос:\n" +
                   text
               }
             ],
+
             temperature: 0.9,
-            max_tokens: 300
+
+            max_tokens: 350
           })
         }
       );
 
       const data = await aiResponse.json();
 
-      if (data.error) {
-        reply = "GROQ ERROR: " + data.error.message;
-      } else {
-        reply =
-          data.choices?.[0]?.message?.content ||
-          "🔮 Оракул молчит...";
-      }
-    } catch (error) {
-      reply = "⚠️ Ошибка подключения к AI.";
+      reply =
+        data.choices?.[0]?.message?.content ||
+        "🔮 Оракул молчит.";
+
+    } catch (e) {
+
+      reply = "⚠️ AI connection failed.";
     }
   }
 
-  await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      chat_id: chatId,
-      text: reply,
-      reply_markup: {
-        inline_keyboard: [
-          [
-            { text: "₿ BTC", callback_data: "btc" },
-            { text: "⚡ ETH", callback_data: "eth" }
-          ],
-          [
-            { text: "🟡 BNB", callback_data: "bnb" },
-            { text: "🟣 SOL", callback_data: "sol" }
-          ],
-          [
-            { text: "🔵 XRP", callback_data: "xrp" },
-            { text: "🌑 SIGNAL", callback_data: "signal" }
-          ],
-          [
-            { text: "♈ HOROSCOPE", callback_data: "horoscope" },
-            { text: "🪬 RUNES", callback_data: "runes" }
+  await fetch(
+    `https://api.telegram.org/bot${telegramToken}/sendMessage`,
+
+    {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify({
+        chat_id: chatId,
+
+        text: reply,
+
+        reply_markup: {
+          inline_keyboard: [
+
+            [
+              {
+                text: `₿ BTC $${coins.btc.price}`,
+                callback_data: "btc"
+              },
+
+              {
+                text: `⚡ ETH $${coins.eth.price}`,
+                callback_data: "eth"
+              }
+            ],
+
+            [
+              {
+                text: `🟡 BNB $${coins.bnb.price}`,
+                callback_data: "bnb"
+              },
+
+              {
+                text: `🟣 SOL $${coins.sol.price}`,
+                callback_data: "sol"
+              }
+            ],
+
+            [
+              {
+                text: `🔵 XRP $${coins.xrp.price}`,
+                callback_data: "xrp"
+              },
+
+              {
+                text: "🌑 SIGNAL",
+                callback_data: "signal"
+              }
+            ],
+
+            [
+              {
+                text: "♈ HOROSCOPE",
+                callback_data: "horoscope"
+              },
+
+              {
+                text: "🪬 RUNES",
+                callback_data: "runes"
+              }
+            ]
           ]
-        ]
-      }
-    })
-  });
+        }
+      })
+    }
+  );
 
   res.status(200).end();
 };
