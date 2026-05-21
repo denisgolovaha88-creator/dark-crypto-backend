@@ -1,6 +1,6 @@
 module.exports = async (req, res) => {
 
-  const telegramToken = "ТВОЙ_TELEGRAM_TOKEN";
+  const telegramToken = "8821653271:AAEHIe7QhmcOOjxQFJ6DT5WPjZU9hczuVP8";
 
   const response = await fetch(
     `https://api.telegram.org/bot${telegramToken}/setMyCommands`,
