@@ -23,6 +23,7 @@ module.exports = async (req, res) => {
   }
 
   let cryptoData = {};
+  let marketData = {};
 
   try {
 
@@ -31,6 +32,34 @@ module.exports = async (req, res) => {
     );
 
     cryptoData = await response.json();
+
+    const btcKlines = await fetch(
+      "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1h&limit=24"
+    );
+
+    const ethKlines = await fetch(
+      "https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=1h&limit=24"
+    );
+
+    const bnbKlines = await fetch(
+      "https://api.binance.com/api/v3/klines?symbol=BNBUSDT&interval=1h&limit=24"
+    );
+
+    const solKlines = await fetch(
+      "https://api.binance.com/api/v3/klines?symbol=SOLUSDT&interval=1h&limit=24"
+    );
+
+    const xrpKlines = await fetch(
+      "https://api.binance.com/api/v3/klines?symbol=XRPUSDT&interval=1h&limit=24"
+    );
+
+    marketData = {
+      btc: await btcKlines.json(),
+      eth: await ethKlines.json(),
+      bnb: await bnbKlines.json(),
+      sol: await solKlines.json(),
+      xrp: await xrpKlines.json()
+    };
 
   } catch (e) {
 
@@ -48,36 +77,36 @@ module.exports = async (req, res) => {
     btc: {
       name: "Bitcoin",
       symbol: "₿",
-      price: cryptoData.bitcoin.usd,
-      change: cryptoData.bitcoin.usd_24h_change
+      price: cryptoData.bitcoin?.usd || 0,
+      change: cryptoData.bitcoin?.usd_24h_change || 0
     },
 
     eth: {
       name: "Ethereum",
       symbol: "⚡",
-      price: cryptoData.ethereum.usd,
-      change: cryptoData.ethereum.usd_24h_change
+      price: cryptoData.ethereum?.usd || 0,
+      change: cryptoData.ethereum?.usd_24h_change || 0
     },
 
     bnb: {
       name: "BNB",
       symbol: "🟡",
-      price: cryptoData.binancecoin.usd,
-      change: cryptoData.binancecoin.usd_24h_change
+      price: cryptoData.binancecoin?.usd || 0,
+      change: cryptoData.binancecoin?.usd_24h_change || 0
     },
 
     sol: {
       name: "Solana",
       symbol: "🟣",
-      price: cryptoData.solana.usd,
-      change: cryptoData.solana.usd_24h_change
+      price: cryptoData.solana?.usd || 0,
+      change: cryptoData.solana?.usd_24h_change || 0
     },
 
     xrp: {
       name: "XRP",
       symbol: "🔵",
-      price: cryptoData.ripple.usd,
-      change: cryptoData.ripple.usd_24h_change
+      price: cryptoData.ripple?.usd || 0,
+      change: cryptoData.ripple?.usd_24h_change || 0
     }
   };
 
@@ -86,52 +115,73 @@ module.exports = async (req, res) => {
       (a, b) => b.change - a.change
     )[0];
 
-  function generateSignal(coin) {
+  function generateSignal(coin, symbol) {
+
+    const candles = marketData[symbol];
+
+    if (!candles || !candles.length) {
+
+      return `
+⚠️ Анализ временно недоступен.
+`;
+    }
+
+    const closes = candles.map(c =>
+      parseFloat(c[4])
+    );
+
+    const first = closes[0];
+    const last = closes[closes.length - 1];
+
+    const trendPercent =
+      ((last - first) / first) * 100;
+
+    const bullish = trendPercent > 0;
+
+    const volatility =
+      Math.max(...closes) -
+      Math.min(...closes);
 
     const confidence = Math.min(
-      95,
+      97,
       Math.max(
-        55,
+        52,
         Math.floor(
-          60 + Math.abs(coin.change) * 5
+          55 +
+          Math.abs(trendPercent) * 6 +
+          (volatility / last) * 100
         )
       )
     );
 
-    const bullish = coin.change > 0;
+    let recommendation = "🟡 НЕЙТРАЛЬНО";
 
-    const recommendation =
-      bullish
-        ? confidence > 80
-          ? "🟢 СИЛЬНО ПОКУПАТЬ"
-          : "🟢 ПОКУПАТЬ"
-        : confidence > 80
-        ? "🔴 СИЛЬНО ПРОДАВАТЬ"
-        : "🟡 ОСТОРОЖНО";
-
-    const entryPrice = bullish
-      ? (coin.price * 0.992).toFixed(2)
-      : (coin.price * 0.978).toFixed(2);
-
-    const targetPrice = bullish
-      ? (coin.price * 1.045).toFixed(2)
-      : (coin.price * 0.95).toFixed(2);
-
-    const stopLoss = bullish
-      ? (coin.price * 0.97).toFixed(2)
-      : (coin.price * 1.02).toFixed(2);
-
-    let entryTime = "14:00 — 16:00 UTC";
-    let exitTime = "20:00 — 23:00 UTC";
-
-    if (Math.abs(coin.change) > 5) {
-      entryTime = "12:00 — 15:00 UTC";
-      exitTime = "18:00 — 21:00 UTC";
+    if (bullish && confidence > 75) {
+      recommendation = "🟢 ПОКУПАТЬ";
     }
 
-    if (Math.abs(coin.change) < 2) {
-      entryTime = "16:00 — 19:00 UTC";
-      exitTime = "22:00 — 01:00 UTC";
+    if (!bullish && confidence > 75) {
+      recommendation = "🔴 ПРОДАВАТЬ";
+    }
+
+    const entryPrice = bullish
+      ? (last * 0.995).toFixed(2)
+      : (last * 0.985).toFixed(2);
+
+    const targetPrice = bullish
+      ? (last * 1.03).toFixed(2)
+      : (last * 0.97).toFixed(2);
+
+    const stopLoss = bullish
+      ? (last * 0.98).toFixed(2)
+      : (last * 1.02).toFixed(2);
+
+    let entryTime = "15:00 — 18:00 UTC";
+    let exitTime = "20:00 — 00:00 UTC";
+
+    if ((volatility / last) > 0.04) {
+      entryTime = "12:00 — 15:00 UTC";
+      exitTime = "18:00 — 22:00 UTC";
     }
 
     return `
@@ -140,10 +190,13 @@ module.exports = async (req, res) => {
 ━━━━━━━━━━━━━━━
 
 ${coin.symbol} Цена:
-$${coin.price}
+$${last.toFixed(2)}
 
-⚡ Изменение 24ч:
-${coin.change.toFixed(2)}%
+📈 Тренд:
+${trendPercent.toFixed(2)}%
+
+⚡ Волатильность:
+${volatility.toFixed(2)}
 
 ━━━━━━━━━━━━━━━
 
@@ -176,8 +229,11 @@ $${stopLoss}
 
 ${strongestCoin.name}
 
-💰 Волатильность усиливается.
-🔮 Импульс рынка растёт.
+🌑 Анализ основан на:
+• Binance candles
+• Momentum
+• Volatility
+• Trend energy
 `;
   }
 
@@ -186,10 +242,9 @@ ${strongestCoin.name}
     zodiac_oven: `
 ♈ Овен
 
-⚡ Сегодня особенно сильны:
-BTC • SOL
+⚡ BTC усиливает энергию роста.
 
-💰 Высокая вероятность импульсной прибыли.
+💰 Благоприятны быстрые сделки.
 
 🍀 Удача: 78%
 `,
@@ -197,10 +252,9 @@ BTC • SOL
     zodiac_telec: `
 ♉ Телец
 
-🟡 Благоприятны:
-ETH • BNB
+🟡 ETH стабилизирует рынок.
 
-💰 Хороший день для спокойных сделок.
+💰 Подходят спокойные входы.
 
 🍀 Удача: 81%
 `,
@@ -208,9 +262,9 @@ ETH • BNB
     zodiac_bliz: `
 ♊ Близнецы
 
-🟣 Рынок нестабилен.
+🟣 Волатильность возрастает.
 
-⚡ Подходят быстрые сделки.
+⚡ Возможны резкие импульсы.
 
 🍀 Удача: 69%
 `,
@@ -218,7 +272,7 @@ ETH • BNB
     zodiac_rak: `
 ♋ Рак
 
-🌌 День проходит под энергией Ethereum.
+🌌 День проходит под знаком Ethereum.
 
 💰 Благоприятно накопление.
 
@@ -228,9 +282,9 @@ ETH • BNB
     zodiac_lev: `
 ♌ Лев
 
-🔥 BTC усиливает давление покупателей.
+🔥 BTC привлекает внимание китов.
 
-💰 Возможен вечерний импульс.
+💰 Высока вероятность пампа.
 
 🍀 Удача: 88%
 `,
@@ -238,9 +292,9 @@ ETH • BNB
     zodiac_deva: `
 ♍ Дева
 
-🟡 День анализа и осторожности.
+🟡 День осторожных решений.
 
-💰 Не доверяй пампам.
+💰 Не гонись за FOMO.
 
 🍀 Удача: 73%
 `,
@@ -248,9 +302,9 @@ ETH • BNB
     zodiac_vesi: `
 ♎ Весы
 
-⚡ ETH и SOL усиливаются.
+⚡ ETH и SOL усиливают рынок.
 
-💰 Благоприятны среднесрочные сделки.
+💰 Благоприятны swing-сделки.
 
 🍀 Удача: 84%
 `,
@@ -258,9 +312,9 @@ ETH • BNB
     zodiac_scorp: `
 ♏ Скорпион
 
-🌌 Волатильность возрастает.
+🌌 Волатильность усиливается.
 
-💰 Сегодня особенно активны киты.
+💰 Возможны скрытые движения китов.
 
 🍀 Удача: 79%
 `,
@@ -270,7 +324,7 @@ ETH • BNB
 
 🔥 День агрессивного рынка.
 
-⚡ Подходят быстрые входы.
+⚡ Подходят короткие сделки.
 
 🍀 Удача: 77%
 `,
@@ -278,9 +332,9 @@ ETH • BNB
     zodiac_kozerog: `
 ♑ Козерог
 
-🟡 Хороший день для анализа.
+🟡 Рынок требует терпения.
 
-💰 Не спеши фиксировать прибыль.
+💰 Сильны накопительные позиции.
 
 🍀 Удача: 75%
 `,
@@ -288,7 +342,7 @@ ETH • BNB
     zodiac_vodoley: `
 ♒ Водолей
 
-🟣 Solana усиливает своё влияние.
+🟣 Solana усиливает влияние.
 
 💰 Благоприятны вечерние сделки.
 
@@ -300,7 +354,7 @@ ETH • BNB
 
 🌌 Интуиция сегодня особенно сильна.
 
-💰 Рынок готовит скрытый импульс.
+💰 Возможен скрытый рост.
 
 🍀 Удача: 80%
 `
@@ -316,7 +370,21 @@ ETH • BNB
 
   let reply = "";
 
-  if (text === "/start") {
+  if (
+    text === "/start" ||
+    text === "/btc" ||
+    text === "/eth" ||
+    text === "/bnb" ||
+    text === "/sol" ||
+    text === "/xrp" ||
+    text === "/signal" ||
+    text === "/horoscope" ||
+    text === "/runes"
+  ) {
+    text = text.replace("/", "");
+  }
+
+  if (text === "start") {
 
     reply = `
 🌌 CRYPTO NOSTRADAMUS 🔮
@@ -333,13 +401,13 @@ ETH • BNB
 
 ━━━━━━━━━━━━━━━
 
-🌌 День проходит под знаком:
+🌌 Сегодня рынок проходит под знаком:
 
 ${strongestCoin.name}
 
 ━━━━━━━━━━━━━━━
 
-Выбери путь ниже 🔮
+🔮 Mystic AI analysis active
 `;
 
   } else if (
@@ -350,7 +418,10 @@ ${strongestCoin.name}
     text === "xrp"
   ) {
 
-    reply = generateSignal(coins[text]);
+    reply = generateSignal(
+      coins[text],
+      text
+    );
 
   } else if (text === "signal") {
 
@@ -371,7 +442,8 @@ ${strongestCoin.name}
 
 ${strongestCoin.name}
 
-💰 Волатильность усиливается.
+⚡ Волатильность усиливается
+🌑 Momentum растёт
 `;
 
   } else if (text === "horoscope") {
@@ -502,7 +574,7 @@ ${rune}
 
 ━━━━━━━━━━━━━━━
 
-🌌 Руны открыли тебе путь.
+🌌 Руны открыли путь.
 `;
 
   } else {
@@ -530,7 +602,7 @@ ${rune}
                 role: "system",
 
                 content:
-                  "Ты Crypto Nostradamus — мистический AI-оракул крипторынка. Отвечай ТОЛЬКО на русском языке. Используй атмосферу mystical crypto terminal."
+                  "Ты Crypto Nostradamus — мистический AI-оракул крипторынка. Отвечай только на русском языке."
               },
 
               {
@@ -544,14 +616,13 @@ BNB: $${coins.bnb.price}
 SOL: $${coins.sol.price}
 XRP: $${coins.xrp.price}
 
-Вопрос пользователя:
+Вопрос:
 ${text}
 `
               }
             ],
 
             temperature: 0.9,
-
             max_tokens: 300
           })
         }
