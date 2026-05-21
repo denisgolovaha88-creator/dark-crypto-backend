@@ -1,15 +1,15 @@
 import TelegramBot from "node-telegram-bot-api";
 
-const TOKEN = "ВСТАВЬ_СЮДА_ТОКЕН_БОТА";
+const TOKEN = "8821653271:AAEHIe7QhmcOOjxQFJ6DT5WPjZU9hczuVP8";
 
 const GROQ_API_KEY =
-  "ВСТАВЬ_СЮДА_GROQ_КЛЮЧ";
+  "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";
 
 const GNEWS_API_KEY =
-  "ВСТАВЬ_СЮДА_GNEWS_КЛЮЧ";
+  "80d3a911a8c4d3ffe9d4b2dce9b8fdc8";
 
 const COINDESK_API_KEY =
-  "ВСТАВЬ_СЮДА_COINDESK_КЛЮЧ";
+  "3cb3bc0dde8ee347745043db6ab2b5b06bb4e6fd55205549f6e6452dfc590f2a";
 
 const bot = new TelegramBot(TOKEN);
 
