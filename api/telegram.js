@@ -1,3 +1,11 @@
+let cache = global.cryptoCache || {
+  timestamp: 0,
+  cryptoData: null,
+  marketData: null
+};
+
+global.cryptoCache = cache;
+
 module.exports = async (req, res) => {
 
   const telegramToken = "8821653271:AAEHIe7QhmcOOjxQFJ6DT5WPjZU9hczuVP8";
@@ -27,33 +35,51 @@ module.exports = async (req, res) => {
 
   try {
 
-    const priceResponse = await fetch(
-      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,solana,ripple&vs_currencies=usd&include_24hr_change=true"
-    );
+    const now = Date.now();
 
-    cryptoData = await priceResponse.json();
+    if (
+      cache.cryptoData &&
+      cache.marketData &&
+      now - cache.timestamp < 30000
+    ) {
 
-    async function loadChart(id) {
+      cryptoData = cache.cryptoData;
+      marketData = cache.marketData;
 
-      const response = await fetch(
-        `https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=usd&days=1`
+    } else {
+
+      const priceResponse = await fetch(
+        "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,solana,ripple&vs_currencies=usd&include_24hr_change=true"
       );
 
-      return await response.json();
+      cryptoData = await priceResponse.json();
+
+      async function loadChart(id) {
+
+        const response = await fetch(
+          `https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=usd&days=1`
+        );
+
+        return await response.json();
+      }
+
+      marketData = {
+
+        btc: await loadChart("bitcoin"),
+
+        eth: await loadChart("ethereum"),
+
+        bnb: await loadChart("binancecoin"),
+
+        sol: await loadChart("solana"),
+
+        xrp: await loadChart("ripple")
+      };
+
+      cache.cryptoData = cryptoData;
+      cache.marketData = marketData;
+      cache.timestamp = now;
     }
-
-    marketData = {
-
-      btc: await loadChart("bitcoin"),
-
-      eth: await loadChart("ethereum"),
-
-      bnb: await loadChart("binancecoin"),
-
-      sol: await loadChart("solana"),
-
-      xrp: await loadChart("ripple")
-    };
 
   } catch (e) {
 
@@ -250,12 +276,6 @@ $${stopLoss}
 🌌 Сегодня рынок проходит под знаком:
 
 ${strongestCoin.name}
-
-🌑 Анализ основан на:
-• Market momentum
-• Trend energy
-• Volatility
-• CoinGecko realtime data
 `;
   }
 
@@ -463,17 +483,12 @@ ${strongestCoin.name}
 🌌 Сегодня рынок проходит под знаком:
 
 ${strongestCoin.name}
-
-⚡ Momentum усиливается
-🌑 Волатильность растёт
 `;
 
   } else if (text === "horoscope") {
 
     reply = `
 ♈ КРИПТОГОРОСКОП
-
-━━━━━━━━━━━━━━━
 
 Выбери знак 🔮
 `;
@@ -489,82 +504,32 @@ ${strongestCoin.name}
 
         body: JSON.stringify({
           chat_id: chatId,
-
           text: reply,
-
           reply_markup: {
             inline_keyboard: [
-
               [
-                {
-                  text: "♈ Овен",
-                  callback_data: "zodiac_oven"
-                },
-
-                {
-                  text: "♉ Телец",
-                  callback_data: "zodiac_telec"
-                }
+                { text: "♈ Овен", callback_data: "zodiac_oven" },
+                { text: "♉ Телец", callback_data: "zodiac_telec" }
               ],
-
               [
-                {
-                  text: "♊ Близнецы",
-                  callback_data: "zodiac_bliz"
-                },
-
-                {
-                  text: "♋ Рак",
-                  callback_data: "zodiac_rak"
-                }
+                { text: "♊ Близнецы", callback_data: "zodiac_bliz" },
+                { text: "♋ Рак", callback_data: "zodiac_rak" }
               ],
-
               [
-                {
-                  text: "♌ Лев",
-                  callback_data: "zodiac_lev"
-                },
-
-                {
-                  text: "♍ Дева",
-                  callback_data: "zodiac_deva"
-                }
+                { text: "♌ Лев", callback_data: "zodiac_lev" },
+                { text: "♍ Дева", callback_data: "zodiac_deva" }
               ],
-
               [
-                {
-                  text: "♎ Весы",
-                  callback_data: "zodiac_vesi"
-                },
-
-                {
-                  text: "♏ Скорпион",
-                  callback_data: "zodiac_scorp"
-                }
+                { text: "♎ Весы", callback_data: "zodiac_vesi" },
+                { text: "♏ Скорпион", callback_data: "zodiac_scorp" }
               ],
-
               [
-                {
-                  text: "♐ Стрелец",
-                  callback_data: "zodiac_strel"
-                },
-
-                {
-                  text: "♑ Козерог",
-                  callback_data: "zodiac_kozerog"
-                }
+                { text: "♐ Стрелец", callback_data: "zodiac_strel" },
+                { text: "♑ Козерог", callback_data: "zodiac_kozerog" }
               ],
-
               [
-                {
-                  text: "♒ Водолей",
-                  callback_data: "zodiac_vodoley"
-                },
-
-                {
-                  text: "♓ Рыбы",
-                  callback_data: "zodiac_ribi"
-                }
+                { text: "♒ Водолей", callback_data: "zodiac_vodoley" },
+                { text: "♓ Рыбы", callback_data: "zodiac_ribi" }
               ]
             ]
           }
@@ -601,66 +566,9 @@ ${rune}
 
   } else {
 
-    try {
-
-      const aiResponse = await fetch(
-        "https://api.groq.com/openai/v1/chat/completions",
-
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${groqKey}`
-          },
-
-          body: JSON.stringify({
-
-            model: "llama-3.3-70b-versatile",
-
-            messages: [
-
-              {
-                role: "system",
-
-                content:
-                  "Ты Crypto Nostradamus — мистический AI-оракул крипторынка. Отвечай только на русском языке."
-              },
-
-              {
-                role: "user",
-
-                content:
-                  `
-BTC: $${coins.btc.price}
-ETH: $${coins.eth.price}
-BNB: $${coins.bnb.price}
-SOL: $${coins.sol.price}
-XRP: $${coins.xrp.price}
-
-Вопрос:
-${text}
-`
-              }
-            ],
-
-            temperature: 0.9,
-            max_tokens: 300
-          })
-        }
-      );
-
-      const data = await aiResponse.json();
-
-      reply =
-        data.choices?.[0]?.message?.content ||
-        "🔮 Оракул временно молчит.";
-
-    } catch (e) {
-
-      reply =
-        "⚠️ Энергия AI временно недоступна.";
-    }
+    reply = `
+🔮 Оракул наблюдает рынок...
+`;
   }
 
   await fetch(
