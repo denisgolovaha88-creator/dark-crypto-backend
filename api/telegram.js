@@ -1,15 +1,20 @@
 let cache = global.cryptoCache || {
   timestamp: 0,
   cryptoData: null,
-  marketData: null
+  marketData: null,
+  fearGreed: null,
+  news: null
 };
 
 global.cryptoCache = cache;
 
+let userRunes = global.userRunes || {};
+global.userRunes = userRunes;
+
 module.exports = async (req, res) => {
 
   const telegramToken = "8821653271:AAEHIe7QhmcOOjxQFJ6DT5WPjZU9hczuVP8";
-  const groqKey = "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";
+  const groqKey = "8821653271:AAEHIe7QhmcOOjxQFJ6DT5WPjZU9hczuVP8";
 
   if (req.method !== "POST") {
     return res.status(200).send("Crypto Nostradamus online 🔮");
@@ -20,6 +25,10 @@ module.exports = async (req, res) => {
   const chatId =
     body.message?.chat?.id ||
     body.callback_query?.message?.chat?.id;
+
+  const userId =
+    body.message?.from?.id ||
+    body.callback_query?.from?.id;
 
   let text =
     body.message?.text ||
@@ -32,6 +41,8 @@ module.exports = async (req, res) => {
 
   let cryptoData = {};
   let marketData = {};
+  let fearGreed = {};
+  let newsData = [];
 
   try {
 
@@ -40,11 +51,14 @@ module.exports = async (req, res) => {
     if (
       cache.cryptoData &&
       cache.marketData &&
+      cache.fearGreed &&
       now - cache.timestamp < 30000
     ) {
 
       cryptoData = cache.cryptoData;
       marketData = cache.marketData;
+      fearGreed = cache.fearGreed;
+      newsData = cache.news;
 
     } else {
 
@@ -66,18 +80,32 @@ module.exports = async (req, res) => {
       marketData = {
 
         btc: await loadChart("bitcoin"),
-
         eth: await loadChart("ethereum"),
-
         bnb: await loadChart("binancecoin"),
-
         sol: await loadChart("solana"),
-
         xrp: await loadChart("ripple")
       };
 
+      const fearResponse = await fetch(
+        "https://api.alternative.me/fng/"
+      );
+
+      fearGreed = await fearResponse.json();
+
+      const newsResponse = await fetch(
+        "https://min-api.cryptocompare.com/data/v2/news/?lang=EN"
+      );
+
+      const newsJson =
+        await newsResponse.json();
+
+      newsData =
+        newsJson.Data?.slice(0, 5) || [];
+
       cache.cryptoData = cryptoData;
       cache.marketData = marketData;
+      cache.fearGreed = fearGreed;
+      cache.news = newsData;
       cache.timestamp = now;
     }
 
@@ -88,9 +116,7 @@ module.exports = async (req, res) => {
     const reply = `
 ⚠️ MARKET DATA ERROR
 
-CoinGecko временно недоступен.
-
-🌌 Оракул ожидает восстановления потоков данных...
+🌌 Потоки рыночных данных нарушены.
 `;
 
     await fetch(
@@ -111,6 +137,13 @@ CoinGecko временно недоступен.
 
     return res.status(200).end();
   }
+
+  const fearValue =
+    fearGreed?.data?.[0]?.value || 50;
+
+  const fearText =
+    fearGreed?.data?.[0]?.value_classification ||
+    "Neutral";
 
   const coins = {
 
@@ -285,6 +318,10 @@ CoinGecko временно недоступен.
       confidence += 10;
     }
 
+    if (fearValue < 25 || fearValue > 75) {
+      confidence += 8;
+    }
+
     confidence += Math.min(
       18,
       Math.floor(
@@ -293,7 +330,7 @@ CoinGecko временно недоступен.
     );
 
     confidence = Math.min(
-      96,
+      98,
       confidence
     );
 
@@ -316,19 +353,6 @@ CoinGecko временно недоступен.
         "⚠️ Медвежье давление растёт";
     }
 
-    let rsiText =
-      "⚖️ Баланс рынка";
-
-    if (rsi < 30) {
-      rsiText =
-        "🟢 Актив перепродан";
-    }
-
-    if (rsi > 70) {
-      rsiText =
-        "🔴 Актив перекуплен";
-    }
-
     const entryPrice = bullish
       ? (last * 0.994).toFixed(2)
       : (last * 0.985).toFixed(2);
@@ -341,23 +365,6 @@ CoinGecko временно недоступен.
       ? (last * 0.98).toFixed(2)
       : (last * 1.02).toFixed(2);
 
-    let entryTime =
-      "14:00 — 17:00 UTC";
-
-    let exitTime =
-      "20:00 — 23:00 UTC";
-
-    if (
-      volatility / last > 0.05
-    ) {
-
-      entryTime =
-        "11:00 — 14:00 UTC";
-
-      exitTime =
-        "18:00 — 21:00 UTC";
-    }
-
     return `
 🔮 ${coin.name.toUpperCase()} ORACLE
 
@@ -369,17 +376,8 @@ $${last.toFixed(2)}
 📈 Тренд:
 ${trendPercent.toFixed(2)}%
 
-⚡ Волатильность:
-${volatility.toFixed(2)}
-
-━━━━━━━━━━━━━━━
-
 📊 RSI:
 ${rsi.toFixed(2)}
-
-${rsiText}
-
-━━━━━━━━━━━━━━━
 
 ⚡ EMA20:
 $${ema20.toFixed(2)}
@@ -400,87 +398,41 @@ ${confidence}%
 💰 Оптимальный вход:
 $${entryPrice}
 
-⏳ Лучшее время входа:
-${entryTime}
-
 🎯 Цель:
 $${targetPrice}
-
-🚪 Лучшее время фиксации:
-${exitTime}
 
 🛡 Стоп-лосс:
 $${stopLoss}
 
 ━━━━━━━━━━━━━━━
 
+😱 Fear & Greed:
+${fearValue} (${fearText})
+
 ${marketMood}
-
-🌌 Сегодня рынок проходит под знаком:
-
-${strongestCoin.name}
 
 ━━━━━━━━━━━━━━━
 
-🌑 Анализ основан на:
+📰 Последний импульс рынка:
 
-• RSI
-• EMA20
-• EMA50
-• Momentum
-• Volatility
+${newsData[0]?.title || "Новости скрыты туманом"}
+
+━━━━━━━━━━━━━━━
+
+🌌 День проходит под знаком:
+
+${strongestCoin.name}
 `;
   }
-
-  const zodiacPredictions = {
-
-    zodiac_oven: `
-♈ Овен
-
-🔥 BTC усиливает энергию роста.
-
-💰 Благоприятны быстрые сделки.
-
-🍀 Удача: 78%
-`,
-
-    zodiac_telec: `
-♉ Телец
-
-🟡 ETH стабилизирует рынок.
-
-💰 Подходят спокойные входы.
-
-🍀 Удача: 81%
-`,
-
-    zodiac_bliz: `
-♊ Близнецы
-
-🟣 Волатильность возрастает.
-
-⚡ Возможны резкие импульсы.
-
-🍀 Удача: 69%
-`,
-
-    zodiac_rak: `
-♋ Рак
-
-🌌 День проходит под знаком Ethereum.
-
-💰 Благоприятно накопление.
-
-🍀 Удача: 74%
-`
-  };
 
   const runes = [
     "ᚠ FEHU — руна богатства",
     "ᚱ RAIDHO — руна движения",
     "ᚲ KENAZ — руна прорыва",
     "ᚺ HAGALAZ — руна хаоса",
-    "ᚨ ANSUZ — руна инсайта"
+    "ᚨ ANSUZ — руна инсайта",
+    "ᛉ ALGIZ — защита капитала",
+    "ᛟ OTHALA — накопление силы"
   ];
 
   let reply = "";
@@ -493,8 +445,8 @@ ${strongestCoin.name}
     text === "/sol" ||
     text === "/xrp" ||
     text === "/signal" ||
-    text === "/horoscope" ||
-    text === "/runes"
+    text === "/runes" ||
+    text === "/news"
   ) {
     text = text.replace("/", "");
   }
@@ -516,12 +468,19 @@ ${strongestCoin.name}
 
 ━━━━━━━━━━━━━━━
 
+😱 Fear & Greed:
+${fearValue} (${fearText})
+
+━━━━━━━━━━━━━━━
+
 🌌 Сегодня рынок проходит под знаком:
 
 ${strongestCoin.name}
 
 ━━━━━━━━━━━━━━━
 
+🐋 Whale energy detected
+📰 News streams active
 🔮 Mystic AI analysis active
 `;
 
@@ -553,19 +512,68 @@ ${strongestCoin.name}
 
 ━━━━━━━━━━━━━━━
 
+😱 Fear & Greed:
+${fearValue} (${fearText})
+
+━━━━━━━━━━━━━━━
+
 🌌 Сегодня рынок проходит под знаком:
 
 ${strongestCoin.name}
 `;
 
-  } else if (text === "runes") {
-
-    const rune =
-      runes[
-        Math.floor(Math.random() * runes.length)
-      ];
+  } else if (text === "news") {
 
     reply = `
+📰 CRYPTO NEWS STREAM
+
+━━━━━━━━━━━━━━━
+
+${newsData
+  .map(
+    n => `• ${n.title}`
+  )
+  .join("\n\n")}
+`;
+
+  } else if (text === "runes") {
+
+    const today =
+      new Date().toDateString();
+
+    if (
+      userRunes[userId] &&
+      userRunes[userId].date === today
+    ) {
+
+      reply = `
+🪬 РУНА ДНЯ
+
+━━━━━━━━━━━━━━━
+
+${userRunes[userId].rune}
+
+━━━━━━━━━━━━━━━
+
+🌌 Руны уже открыли тебе путь сегодня.
+`;
+
+    } else {
+
+      const rune =
+        runes[
+          Math.floor(
+            Math.random() *
+            runes.length
+          )
+        ];
+
+      userRunes[userId] = {
+        rune,
+        date: today
+      };
+
+      reply = `
 🪬 РУНА ДНЯ
 
 ━━━━━━━━━━━━━━━
@@ -574,14 +582,76 @@ ${rune}
 
 ━━━━━━━━━━━━━━━
 
-🌌 Руны открыли путь.
+🌌 Руны открыли твой путь на сегодня.
 `;
+    }
 
   } else {
 
-    reply = `
-🔮 Оракул наблюдает рынок...
-`;
+    try {
+
+      const aiResponse = await fetch(
+        "https://api.groq.com/openai/v1/chat/completions",
+
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${groqKey}`
+          },
+
+          body: JSON.stringify({
+
+            model: "llama-3.3-70b-versatile",
+
+            messages: [
+
+              {
+                role: "system",
+
+                content:
+                  "Ты Crypto Nostradamus — мистический AI оракул крипторынка. Отвечай только на русском."
+              },
+
+              {
+                role: "user",
+
+                content:
+                  `
+BTC: $${coins.btc.price}
+ETH: $${coins.eth.price}
+
+Fear & Greed:
+${fearValue}
+
+Последняя новость:
+${newsData[0]?.title}
+
+Вопрос:
+${text}
+`
+              }
+            ],
+
+            temperature: 0.9,
+            max_tokens: 300
+          })
+        }
+      );
+
+      const data =
+        await aiResponse.json();
+
+      reply =
+        data.choices?.[0]?.message?.content ||
+        "🔮 Оракул молчит.";
+
+    } catch (e) {
+
+      reply =
+        "⚠️ AI потоки временно нестабильны.";
+    }
   }
 
   await fetch(
@@ -640,6 +710,11 @@ ${rune}
             ],
 
             [
+              {
+                text: "📰 NEWS",
+                callback_data: "news"
+              },
+
               {
                 text: "🪬 RUNES",
                 callback_data: "runes"
