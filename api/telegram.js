@@ -1,4 +1,10 @@
+const {
+  getUser,
+  updateUser
+} = require("../lib/storage");
+
 module.exports = async (req, res) => {
+
   const telegramToken = "8821653271:AAEHIe7QhmcOOjxQFJ6DT5WPjZU9hczuVP8";
   const groqKey = "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";
 
@@ -25,6 +31,7 @@ module.exports = async (req, res) => {
   let cryptoData = {};
 
   try {
+
     const response = await fetch(
       "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,solana,ripple,litecoin&vs_currencies=usd&include_24hr_change=true"
     );
@@ -36,6 +43,7 @@ module.exports = async (req, res) => {
   }
 
   const coins = {
+
     btc: {
       symbol: "₿",
       name: "Bitcoin",
@@ -181,6 +189,7 @@ ${
   }
 
   const zodiacPredictions = {
+
     zodiac_oven: `
 ♈ Овен
 
@@ -329,6 +338,7 @@ ETH • BNB
   };
 
   const runes = [
+
     {
       name: "ᚠ FEHU",
       text:
@@ -381,9 +391,6 @@ ETH • BNB
 
 ${strongestCoin.name.toUpperCase()}
 
-⚡ Монета дня показывает
-самый сильный импульс рынка.
-
 ━━━━━━━━━━━━━━━
 
 🔮 Выбери путь ниже.
@@ -428,12 +435,7 @@ ${strongestCoin.name.toUpperCase()}
 
 ${strongestCoin.name.toUpperCase()}
 
-⚡ Самая сильная монета дня:
-${strongestCoin.name}
-
 💰 Волатильность усиливается.
-
-🔮 Крипторынок готовится к движению.
 `;
 
   } else if (text === "horoscope") {
@@ -459,6 +461,7 @@ ${strongestCoin.name}
 
           reply_markup: {
             inline_keyboard: [
+
               [
                 {
                   text: "♈ Овен",
@@ -546,18 +549,43 @@ ${strongestCoin.name}
 
   } else if (text === "runes") {
 
+    const user = getUser(chatId);
+
     const today =
       new Date().toISOString().split("T")[0];
 
-    const userSeed =
-      parseInt(chatId.toString().slice(-3));
+    if (user.lastRuneDate === today) {
 
-    const runeIndex =
-      (today.length + userSeed) % runes.length;
+      reply = `
+🪬 РУНА ДНЯ УЖЕ ПОЛУЧЕНА
 
-    const rune = runes[runeIndex];
+━━━━━━━━━━━━━━━
 
-    reply = `
+${user.lastRune}
+
+━━━━━━━━━━━━━━━
+
+🌌 Следующая руна станет доступна завтра.
+`;
+
+    } else {
+
+      const rune =
+        runes[
+          Math.floor(Math.random() * runes.length)
+        ];
+
+      updateUser(chatId, {
+        lastRuneDate: today,
+
+        lastRune: `
+${rune.name}
+
+${rune.text}
+`
+      });
+
+      reply = `
 🪬 РУНА ДНЯ
 
 ━━━━━━━━━━━━━━━
@@ -568,8 +596,9 @@ ${rune.text}
 
 ━━━━━━━━━━━━━━━
 
-🌌 Следующая руна будет доступна завтра.
+🌌 Эта руна будет сопровождать тебя весь день.
 `;
+    }
 
   } else {
 
@@ -594,25 +623,21 @@ ${rune.text}
                 role: "system",
 
                 content:
-                  "Ты Crypto Nostradamus — мистический крипто-оракул. Отвечай только на русском языке. Используй атмосферу mystical crypto terminal. Анализируй рынок серьёзно."
+                  "Ты Crypto Nostradamus — мистический крипто-оракул. Отвечай только на русском языке."
               },
 
               {
                 role: "user",
 
                 content:
-                  "Текущий рынок:\n" +
+                  `BTC ${coins.btc.price}
+ETH ${coins.eth.price}
+BNB ${coins.bnb.price}
+SOL ${coins.sol.price}
+XRP ${coins.xrp.price}
 
-                  `
-BTC: ${coins.btc.price}
-ETH: ${coins.eth.price}
-BNB: ${coins.bnb.price}
-SOL: ${coins.sol.price}
-XRP: ${coins.xrp.price}
-` +
-
-                  "\n\nВопрос:\n" +
-                  text
+Вопрос:
+${text}`
               }
             ],
 
