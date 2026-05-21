@@ -1,8 +1,3 @@
-const {
-  getUser,
-  updateUser
-} = require("../lib/storage");
-
 module.exports = async (req, res) => {
 
   const telegramToken = "8821653271:AAEHIe7QhmcOOjxQFJ6DT5WPjZU9hczuVP8";
@@ -547,7 +542,7 @@ ${strongestCoin.name.toUpperCase()}
       zodiacPredictions[text] ||
       "🔮 Оракул не смог прочитать звёзды.";
 
-  } else if (text === "runes") {
+    } else {
 
     const user = getUser(chatId);
 
