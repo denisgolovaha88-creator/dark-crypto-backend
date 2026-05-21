@@ -1,21 +1,9 @@
-const {
-  getMarketData
-} = require("../lib/market");
+const { getMarketData } = require("../lib/market");
+const { buildSignal } = require("../lib/signals");
+const { getNews, getMarketMood } = require("../lib/news");
 
-const {
-  buildSignal
-} = require("../lib/signals");
-
-const {
-  getNews,
-  getMarketMood
-} = require("../lib/news");
-
-const horoscope =
-require("../lib/horoscope");
-
-const runes =
-require("../lib/runes");
+const horoscope = require("../lib/horoscope");
+const runes = require("../lib/runes");
 
 const TELEGRAM_TOKEN =
   "8821653271:AAEHIe7QhmcOOjxQFJ6DT5WPjZU9hczuVP8";
@@ -31,28 +19,38 @@ async function sendMessage(
   keyboard = null
 ) {
 
-  await fetch(
-    `${BASE}/sendMessage`,
-    {
+  try {
 
-      method: "POST",
+    await fetch(
+      `${BASE}/sendMessage`,
+      {
 
-      headers: {
-        "Content-Type":
-          "application/json"
-      },
+        method: "POST",
 
-      body: JSON.stringify({
+        headers: {
+          "Content-Type":
+            "application/json"
+        },
 
-        chat_id: chatId,
+        body: JSON.stringify({
 
-        text,
+          chat_id: chatId,
 
-        reply_markup:
-          keyboard
-      })
-    }
-  );
+          text,
+
+          reply_markup:
+            keyboard
+        })
+      }
+    );
+
+  } catch (e) {
+
+    console.log(
+      "SEND ERROR",
+      e
+    );
+  }
 }
 
 function buildKeyboard(
@@ -138,7 +136,7 @@ function getCoinOfDay(
       name:
         "Bitcoin",
 
-      price:
+      value:
         market.BTC
     },
 
@@ -146,7 +144,7 @@ function getCoinOfDay(
       name:
         "Ethereum",
 
-      price:
+      value:
         market.ETH
     },
 
@@ -154,7 +152,7 @@ function getCoinOfDay(
       name:
         "BNB",
 
-      price:
+      value:
         market.BNB
     },
 
@@ -162,7 +160,7 @@ function getCoinOfDay(
       name:
         "Solana",
 
-      price:
+      value:
         market.SOL
     },
 
@@ -170,14 +168,14 @@ function getCoinOfDay(
       name:
         "XRP",
 
-      price:
+      value:
         market.XRP
     }
   ];
 
   coins.sort(
     (a, b) =>
-      b.price - a.price
+      b.value - a.value
   );
 
   return coins[0].name;
@@ -196,30 +194,32 @@ async function handler(
     return res
       .status(200)
       .send(
-        "Crypto Oracle online"
+        "CRYPTO ORACLE ONLINE"
       );
   }
 
-  const body =
-    req.body;
-
-  const message =
-    body.message;
-
-  if (!message) {
-
-    return res
-      .status(200)
-      .send("ok");
-  }
-
-  const chatId =
-    message.chat.id;
-
-  const text =
-    message.text || "";
-
   try {
+
+    const body =
+      req.body;
+
+    if (
+      !body.message
+    ) {
+
+      return res
+        .status(200)
+        .send("ok");
+    }
+
+    const message =
+      body.message;
+
+    const chatId =
+      message.chat.id;
+
+    const text =
+      message.text || "";
 
     const market =
       await getMarketData();
@@ -238,7 +238,7 @@ async function handler(
       const mood =
         getMarketMood();
 
-      const coinDay =
+      const coin =
         getCoinOfDay(
           market
         );
@@ -252,10 +252,10 @@ async function handler(
 
 ━━━━━━━━━━
 
-🌑 Сегодня рынок
-проходит под знаком:
+🌑 День проходит
+под знаком:
 
-${coinDay}
+${coin}
 
 ━━━━━━━━━━
 
@@ -264,6 +264,7 @@ ${mood}
 ━━━━━━━━━━
 
 📡 Потоки рынка открыты.
+
 Используй панель
 оракула для анализа.
 `,
@@ -402,10 +403,10 @@ XRP
 `;
 
       news.forEach(
-        n => {
+        item => {
 
           newsText +=
-            `• ${n.title}\n\n`;
+            `• ${item.title}\n\n`;
         }
       );
 
@@ -429,10 +430,14 @@ XRP
 
         runeCooldowns[
           chatId
-        ]?.date === today
+        ] &&
+
+        runeCooldowns[
+          chatId
+        ].date === today
       ) {
 
-        return await sendMessage(
+        await sendMessage(
 
           chatId,
 
@@ -440,6 +445,10 @@ XRP
             chatId
           ].text
         );
+
+        return res
+          .status(200)
+          .send("ok");
       }
 
       const rune =
@@ -513,9 +522,7 @@ ${rune.text}
     // HOROSCOPE SIGNS
 
     else if (
-      horoscope[
-        text
-      ]
+      horoscope[text]
     ) {
 
       const mood =
@@ -564,25 +571,19 @@ https://t.me/ТВОЙ_БОТ
       );
     }
 
+    return res
+      .status(200)
+      .send("ok");
+
   } catch (e) {
 
-    console.log(e);
-
-    await sendMessage(
-
-      chatId,
-
-`
-⚠️ Потоки рынка
-временно нестабильны.
-
-Оракул не может
-увидеть движение.
-`
+    console.log(
+      "GLOBAL ERROR",
+      e
     );
-  }
 
-  return res
-    .status(200)
-    .send("ok");
+    return res
+      .status(200)
+      .send("error");
+  }
 };
