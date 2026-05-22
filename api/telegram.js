@@ -1,25 +1,20 @@
 // ======================================================
 // 🌌 CRYPTO NOSTRADAMUS ULTIMATE RU
 // ======================================================
-// FULL TELEGRAM ORACLE BOT
+// STABLE BUTTON FIX VERSION
 // ======================================================
 //
-// ✅ ПОЛНОСТЬЮ РУССКИЙ
-// ✅ MYSTIC CRYPTO ORACLE
+// ✅ FIXED BUTTONS
+// ✅ FIXED SIGNALS
+// ✅ FIXED HOROSCOPE
+// ✅ FIXED VIP
+// ✅ FIXED REFERRALS
+// ✅ FIXED RUNES
+// ✅ NORMALIZE TEXT
+// ✅ SUPABASE
 // ✅ EMA / RSI / ATR
-// ✅ ТОЧКИ ВХОДА
-// ✅ TAKE PROFIT / STOP LOSS
-// ✅ ВРЕМЯ ВХОДА
-// ✅ ВРЕМЯ ФИКСАЦИИ
-// ✅ SUPABASE READY
-// ✅ REFERRAL SYSTEM
-// ✅ VIP FOUNDATION
-// ✅ 24 RUNE FOUNDATION
-// ✅ DAILY RUNES
-// ✅ HOROSCOPE 12 SIGNS
-// ✅ REAL MARKET DATA
-// ✅ CACHE
-// ✅ RATE LIMIT
+// ✅ ENTRY / TP / SL
+// ✅ MYSTIC AI
 //
 // ======================================================
 
@@ -113,7 +108,11 @@ module.exports = async (req, res) => {
     body.callback_query?.from?.username ||
     "unknown";
 
-  const text =
+  // ====================================================
+  // NORMALIZE TEXT
+  // ====================================================
+
+  const rawText =
     (
       body.message?.text ||
       body.callback_query?.data ||
@@ -121,6 +120,30 @@ module.exports = async (req, res) => {
     )
       .trim()
       .toLowerCase();
+
+  function normalizeText(str) {
+
+    return str
+
+      .toLowerCase()
+
+      .replace(
+        /\$\d+(\.\d+)?/g,
+        ""
+      )
+
+      .replace(
+        /[^\p{L}\p{N}\s]/gu,
+        ""
+      )
+
+      .replace(/\s+/g, " ")
+
+      .trim();
+  }
+
+  const text =
+    normalizeText(rawText);
 
   if (!chatId) {
 
@@ -461,33 +484,33 @@ module.exports = async (req, res) => {
     keyboard: [
 
       [
-        { text: "♈ овен" },
-        { text: "♉ телец" }
+        { text: "♈ Овен" },
+        { text: "♉ Телец" }
       ],
 
       [
-        { text: "♊ близнецы" },
-        { text: "♋ рак" }
+        { text: "♊ Близнецы" },
+        { text: "♋ Рак" }
       ],
 
       [
-        { text: "♌ лев" },
-        { text: "♍ дева" }
+        { text: "♌ Лев" },
+        { text: "♍ Дева" }
       ],
 
       [
-        { text: "♎ весы" },
-        { text: "♏ скорпион" }
+        { text: "♎ Весы" },
+        { text: "♏ Скорпион" }
       ],
 
       [
-        { text: "♐ стрелец" },
-        { text: "♑ козерог" }
+        { text: "♐ Стрелец" },
+        { text: "♑ Козерог" }
       ],
 
       [
-        { text: "♒ водолей" },
-        { text: "♓ рыбы" }
+        { text: "♒ Водолей" },
+        { text: "♓ Рыбы" }
       ]
     ],
 
@@ -503,8 +526,10 @@ module.exports = async (req, res) => {
     return (
       data
         .slice(0, period)
-        .reduce((a, b) => a + b, 0)
-      / period
+        .reduce(
+          (a, b) => a + b,
+          0
+        ) / period
     );
   }
 
@@ -643,13 +668,8 @@ EMA50: ${data.ema50}
 ATR: ${data.atr}
 Направление: ${data.direction}
 
-Создай мрачное мистическое пророчество
+Создай мистическое пророчество
 для трейдера.
-
-Стиль:
-мистический,
-крипто,
-атмосферный.
 `;
 
       const r =
@@ -696,12 +716,7 @@ ATR: ${data.atr}
           ?.choices?.[0]
           ?.message?.content ||
 
-`
-🌫 Потоки эфира дрожат.
-
-Киты скрываются во тьме,
-готовя импульс.
-`
+        "🌫 Потоки эфира нестабильны."
       );
 
     } catch {
@@ -709,8 +724,8 @@ ATR: ${data.atr}
       return `
 🌫 Потоки эфира дрожат.
 
-Киты скрываются во тьме,
-готовя импульс.
+Тени китов
+двигаются во мраке.
 `;
     }
   }
@@ -726,6 +741,15 @@ ATR: ${data.atr}
 
     const candles =
       await getOHLC(id);
+
+    if (
+      !candles?.length
+    ) {
+
+      return `
+⚠️ Анализ недоступен.
+`;
+    }
 
     const closes =
       candles.map(
@@ -932,78 +956,37 @@ ${oracle}
   }
 
   // ====================================================
-  // 24 RUNES FOUNDATION
+  // RUNES
   // ====================================================
 
   const runeList = [
 
-    {
-      rarity: "COMMON",
-
-      text:
 `
 ᚠ FEHU
 
 Руна богатства.
 
-Потоки капитала
-начинают пробуждение.
+💰 Потоки капитала
+усиливаются.
+`,
 
-💰 Совет:
-фиксируй прибыль частями.
-`
-    },
-
-    {
-      rarity: "COMMON",
-
-      text:
 `
 ᚺ HAGALAZ
 
 Руна хаоса.
 
-Тьма усиливает волатильность.
+⚠️ Волатильность
+разрушит слабые позиции.
+`,
 
-⚠️ Совет:
-уменьши риск.
-`
-    },
-
-    {
-      rarity: "RARE",
-
-      text:
 `
 ᛉ ALGIZ
 
 Руна защиты.
 
-Киты скрывают движение
-во тьме рынка.
-
-🛡 Совет:
-жди подтверждения импульса.
+🛡 Жди подтверждения
+движения.
 `
-    },
-
-    {
-      rarity: "EPIC",
-
-      text:
-`
-ᛞ DAGAZ
-
-Руна трансформации.
-
-Старый цикл рынка
-завершается.
-
-🌌 Пророчество:
-новый импульс
-изменит баланс сил.
-`
-    }
   ];
 
   // ====================================================
@@ -1012,41 +995,88 @@ ${oracle}
 
   const horoscope = {
 
-    "♈ овен":
+    "овен":
 `
 ♈ ОВЕН
 
-Марс усиливает импульс BTC.
-
-🔥 Удача:
-78%
-
-🌌 Пророчество:
-алые свечи
-осветят путь.
+Марс усиливает BTC импульс.
 `,
 
-    "♉ телец":
+    "телец":
 `
 ♉ ТЕЛЕЦ
 
-Крупный капитал
-начинает накопление.
-
-💰 Удача:
-81%
+Капитал начинает накопление.
 `,
 
-    "♊ близнецы":
+    "близнецы":
 `
 ♊ БЛИЗНЕЦЫ
 
-Информационный хаос
-усиливает рынок.
+Информационный хаос усиливается.
+`,
 
-🌌 Пророчество:
-двойственные тени
-исказят движение.
+    "рак":
+`
+♋ РАК
+
+ETH скрывает накопление.
+`,
+
+    "лев":
+`
+♌ ЛЕВ
+
+BTC доминирует на рынке.
+`,
+
+    "дева":
+`
+♍ ДЕВА
+
+Рынок требует расчёта.
+`,
+
+    "весы":
+`
+♎ ВЕСЫ
+
+Баланс нарушен.
+`,
+
+    "скорпион":
+`
+♏ СКОРПИОН
+
+Тёмные киты активны.
+`,
+
+    "стрелец":
+`
+♐ СТРЕЛЕЦ
+
+SOL усиливает импульс.
+`,
+
+    "козерог":
+`
+♑ КОЗЕРОГ
+
+Сатурн усиливает терпение.
+`,
+
+    "водолей":
+`
+♒ ВОДОЛЕЙ
+
+Цифровой шторм приближается.
+`,
+
+    "рыбы":
+`
+♓ РЫБЫ
+
+Луна усиливает интуицию.
 `
   };
 
@@ -1057,9 +1087,6 @@ ${oracle}
   if (
     text === "/start"
   ) {
-
-    const refCode =
-      `oracle_${userId}`;
 
     await sendMessage(
 
@@ -1082,12 +1109,6 @@ $${prices.solana.usd}
 
 🔵 XRP:
 $${prices.ripple.usd}
-
-━━━━━━━━━━
-
-🔗 ТВОЙ РЕФЕРАЛЬНЫЙ КОД:
-
-${refCode}
 
 ━━━━━━━━━━
 
@@ -1173,8 +1194,6 @@ ${refCode}
 
 `
 🔮 Сегодня руны уже открывали тебе пророчество.
-
-Возвращайся после полуночи.
 `,
 
         keyboard
@@ -1202,27 +1221,14 @@ ${refCode}
         telegram_id:
           userId,
 
-        rune:
-          rune.text,
-
-        rarity:
-          rune.rarity,
+        rune,
 
         date:
           today
       });
 
     await sendMessage(
-
-`
-🌌 РЕДКОСТЬ:
-${rune.rarity}
-
-━━━━━━━━━━
-
-${rune.text}
-`,
-
+      rune,
       keyboard
     );
 
@@ -1242,7 +1248,7 @@ ${rune.text}
     await sendMessage(
 
 `
-🔮 Выбери знак зодиака:
+🔮 Выбери знак:
 `,
 
       zodiacKeyboard
@@ -1284,15 +1290,7 @@ ${rune.text}
 `
 👑 VIP ORACLE
 
-━━━━━━━━━━
-
-🌌 ELITE SIGNALS
-🌌 PREMIUM PROPHECY
-🌌 VOID RUNES
-🌌 WHALE ALERTS
-🌌 PRIORITY ACCESS
-
-⚡ Скоро пробуждение VIP.
+🌌 Скоро пробуждение элиты.
 `,
 
       keyboard
@@ -1308,7 +1306,7 @@ ${rune.text}
   // ====================================================
 
   if (
-    text.includes("рефера")
+    text.includes("реферал")
   ) {
 
     await sendMessage(
@@ -1316,15 +1314,9 @@ ${rune.text}
 `
 👥 REFERRAL SYSTEM
 
-━━━━━━━━━━
-
 🔗 Твой код:
 
 oracle_${userId}
-
-🌌 Приглашай союзников
-и получай будущие
-VIP награды.
 `,
 
       keyboard
@@ -1338,6 +1330,43 @@ VIP награды.
   // ====================================================
   // SIGNALS
   // ====================================================
+
+  let symbol = null;
+
+  if (
+    text.includes("btc")
+  ) {
+
+    symbol = "btc";
+  }
+
+  else if (
+    text.includes("eth")
+  ) {
+
+    symbol = "eth";
+  }
+
+  else if (
+    text.includes("bnb")
+  ) {
+
+    symbol = "bnb";
+  }
+
+  else if (
+    text.includes("sol")
+  ) {
+
+    symbol = "sol";
+  }
+
+  else if (
+    text.includes("xrp")
+  ) {
+
+    symbol = "xrp";
+  }
 
   const routes = {
 
@@ -1356,28 +1385,6 @@ VIP награды.
     xrp:
       "ripple"
   };
-
-  let symbol = null;
-
-  if (text.includes("btc")) {
-    symbol = "btc";
-  }
-
-  else if (text.includes("eth")) {
-    symbol = "eth";
-  }
-
-  else if (text.includes("bnb")) {
-    symbol = "bnb";
-  }
-
-  else if (text.includes("sol")) {
-    symbol = "sol";
-  }
-
-  else if (text.includes("xrp")) {
-    symbol = "xrp";
-  }
 
   if (symbol) {
 
