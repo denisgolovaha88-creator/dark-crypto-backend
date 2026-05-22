@@ -216,7 +216,10 @@ ${getMarketMood()}
     // BTC
 
     else if (
-      upperText.includes("BTC")
+
+      upperText === "/BTC" ||
+      text.startsWith("₿ BTC")
+
     ) {
 
       try {
@@ -251,7 +254,10 @@ ${getMarketMood()}
     // ETH
 
     else if (
-      upperText.includes("ETH")
+
+      upperText === "/ETH" ||
+      text.startsWith("⚡ ETH")
+
     ) {
 
       try {
@@ -269,6 +275,11 @@ ${getMarketMood()}
 
       } catch (e) {
 
+        console.log(
+          "ETH ERROR",
+          e
+        );
+
         await sendMessage(
 
           chatId,
@@ -281,7 +292,10 @@ ${getMarketMood()}
     // BNB
 
     else if (
-      upperText.includes("BNB")
+
+      upperText === "/BNB" ||
+      text.startsWith("🟡 BNB")
+
     ) {
 
       try {
@@ -299,6 +313,11 @@ ${getMarketMood()}
 
       } catch (e) {
 
+        console.log(
+          "BNB ERROR",
+          e
+        );
+
         await sendMessage(
 
           chatId,
@@ -311,7 +330,10 @@ ${getMarketMood()}
     // SOL
 
     else if (
-      upperText.includes("SOL")
+
+      upperText === "/SOL" ||
+      text.startsWith("🟣 SOL")
+
     ) {
 
       try {
@@ -329,6 +351,11 @@ ${getMarketMood()}
 
       } catch (e) {
 
+        console.log(
+          "SOL ERROR",
+          e
+        );
+
         await sendMessage(
 
           chatId,
@@ -341,7 +368,10 @@ ${getMarketMood()}
     // XRP
 
     else if (
-      upperText.includes("XRP")
+
+      upperText === "/XRP" ||
+      text.startsWith("🔵 XRP")
+
     ) {
 
       try {
@@ -358,6 +388,11 @@ ${getMarketMood()}
         );
 
       } catch (e) {
+
+        console.log(
+          "XRP ERROR",
+          e
+        );
 
         await sendMessage(
 
@@ -381,11 +416,11 @@ ${getMarketMood()}
 `
 🌌 Выбери монету:
 
-BTC
-ETH
-BNB
-SOL
-XRP
+/BTC
+/ETH
+/BNB
+/SOL
+/XRP
 `
       );
     }
