@@ -1028,19 +1028,3 @@ ${sentiment.mood || "NEUTRAL"}
       horoscope[text]
     );
   }
-
-  else {
-
-    await sendMessage(
-      chatId,
-`
-🌌 Потоки рынка наблюдают за тобой.
-`,
-      keyboard
-    );
-  }
-
-  return res
-    .status(200)
-    .end();
-};
