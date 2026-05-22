@@ -31,16 +31,19 @@ module.exports = async (req, res) => {
     body.callback_query?.from?.id;
 
   let text =
-    body.message?.text?.toLowerCase() ||
-    body.callback_query?.data?.toLowerCase() ||
+    body.message?.text ||
+    body.callback_query?.data ||
     "";
+
+  const lowerText =
+    text.toLowerCase();
 
   if (!chatId) {
     return res.status(200).end();
   }
 
   // =====================
-  // ЗАГРУЗКА ДАННЫХ
+  // LOAD DATA
   // =====================
 
   let prices = {};
@@ -52,11 +55,9 @@ module.exports = async (req, res) => {
 
     const now = Date.now();
 
-    // КЕШ 30 СЕКУНД
     if (
       cryptoCache.prices &&
       cryptoCache.market &&
-      cryptoCache.news &&
       now - cryptoCache.timestamp < 30000
     ) {
 
@@ -67,15 +68,11 @@ module.exports = async (req, res) => {
 
     } else {
 
-      // ===== ЦЕНЫ =====
-
       const pricesRes = await fetch(
         "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin,solana,ripple&vs_currencies=usd"
       );
 
       prices = await pricesRes.json();
-
-      // ===== ГРАФИКИ =====
 
       async function loadChart(id) {
 
@@ -93,8 +90,6 @@ module.exports = async (req, res) => {
         sol: await loadChart("solana"),
         xrp: await loadChart("ripple")
       };
-
-      // ===== FEAR & GREED =====
 
       try {
 
@@ -115,8 +110,6 @@ module.exports = async (req, res) => {
           ]
         };
       }
-
-      // ===== НОВОСТИ =====
 
       try {
 
@@ -170,7 +163,7 @@ module.exports = async (req, res) => {
   }
 
   // =====================
-  // ИНДИКАТОРЫ
+  // INDICATORS
   // =====================
 
   function EMA(data, period) {
@@ -244,7 +237,7 @@ module.exports = async (req, res) => {
   }
 
   // =====================
-  // МОНЕТЫ
+  // COINS
   // =====================
 
   const coins = {
@@ -271,7 +264,7 @@ module.exports = async (req, res) => {
   };
 
   // =====================
-  // ДЕНЬ ПОД ЗНАКОМ
+  // STRONGEST COIN
   // =====================
 
   const strongestCoin =
@@ -286,172 +279,73 @@ module.exports = async (req, res) => {
   // SIGNAL
   // =====================
 
-  
-function generateSignal(coin, key) {
+  async function generateSignal(coin, key) {
 
-  const data =
-    market[key]?.prices;
+    const data =
+      market[key]?.prices || [];
 
-  if (
-    !data ||
-    !Array.isArray(data) ||
-    data.length < 20
-  ) {
+    if (!data.length) {
+      return `⚠️ Анализ временно недоступен.`;
+    }
 
-    return `
-⚠️ Потоки рынка
-временно скрыты.
+    const closes =
+      data.map(p => p[1]);
 
-Сигнал не может
-быть построен.
-`;
-  }
+    const highs =
+      closes.map(v => v * 1.01);
 
-  const closes =
-    data.map(p => p[1]);
+    const lows =
+      closes.map(v => v * 0.99);
 
-  const highs =
-    closes.map(v => v * 1.01);
+    const last =
+      closes.at(-1);
 
-  const lows =
-    closes.map(v => v * 0.99);
+    const prev =
+      closes.at(-2);
 
-  const last =
-    closes[closes.length - 1];
+    const trend =
+      ((last - prev) / prev) * 100;
 
-  const prev =
-    closes[closes.length - 2];
+    const rsi =
+      RSI(closes, 14);
 
-  const trend =
-    ((last - prev) / prev) * 100;
+    const ema20 =
+      EMA(closes, 20);
 
-  const rsi =
-    RSI(closes, 14);
+    const ema50 =
+      EMA(closes, 50);
 
-  const ema20 =
-    EMA(closes, 20);
+    const atr =
+      ATR(
+        highs,
+        lows,
+        closes,
+        14
+      );
 
-  const ema50 =
-    EMA(closes, 50);
+    const atrPercent =
+      (atr / last) * 100;
 
-  const atr =
-    ATR(
-      highs,
-      lows,
-      closes,
-      14
-    );
+    let recommendation =
+      "⚪ НЕЙТРАЛЬНО";
 
-  const atrPercent =
-    (atr / last) * 100;
+    if (
+      ema20 > ema50 &&
+      rsi > 55 &&
+      trend > 0
+    ) {
+      recommendation =
+        "🟢 ПОКУПАТЬ";
+    }
 
-  let recommendation =
-    "⚪ НЕЙТРАЛЬНО";
-
-  if (
-    ema20 > ema50 &&
-    rsi > 55
-  ) {
-
-    recommendation =
-      "🟢 ПОКУПАТЬ";
-  }
-
-  if (
-    ema20 < ema50 &&
-    rsi < 45
-  ) {
-
-    recommendation =
-      "🔴 ПРОДАВАТЬ";
-  }
-
-  let confidence =
-    Math.floor(
-      65 + Math.random() * 25
-    );
-
-  const entry =
-    last - atr * 0.2;
-
-  const target =
-    recommendation ===
-    "🔴 ПРОДАВАТЬ"
-
-      ? last - atr * 2
-
-      : last + atr * 2;
-
-  const stop =
-    recommendation ===
-    "🔴 ПРОДАВАТЬ"
-
-      ? last + atr
-
-      : last - atr;
-
-  return `
-🔮 ${coin.name.toUpperCase()} ORACLE
-
-━━━━━━━━━━
-
-💰 Цена:
-$${last.toFixed(2)}
-
-📈 Тренд:
-${trend.toFixed(2)}%
-
-🌊 Волатильность:
-${atrPercent.toFixed(2)}%
-
-━━━━━━━━━━
-
-📊 RSI:
-${rsi.toFixed(2)}
-
-📊 EMA20:
-${ema20.toFixed(2)}
-
-📊 EMA50:
-${ema50.toFixed(2)}
-
-━━━━━━━━━━
-
-🧠 Рекомендация:
-
-${recommendation}
-
-🎯 Уверенность:
-${confidence}%
-
-━━━━━━━━━━
-
-💰 Вход:
-$${entry.toFixed(2)}
-
-🎯 Цель:
-$${target.toFixed(2)}
-
-🛡 Стоп:
-$${stop.toFixed(2)}
-
-━━━━━━━━━━
-
-📰 Новости:
-
-${news[0]?.title || "Туманы скрывают новости"}
-`;
-}
-    
-      
-
-    
-      
-
-    
-    
-
-    // ===== УВЕРЕННОСТЬ =====
+    if (
+      ema20 < ema50 &&
+      rsi < 45 &&
+      trend < 0
+    ) {
+      recommendation =
+        "🔴 ПРОДАВАТЬ";
+    }
 
     let confidence = 55;
 
@@ -474,13 +368,10 @@ ${news[0]?.title || "Туманы скрывают новости"}
     confidence =
       Math.min(confidence, 95);
 
-    // ===== ЦЕНЫ =====
-
     let entryPrice;
     let targetPrice;
     let stopLoss;
 
-    // BUY
     if (
       recommendation ===
       "🟢 ПОКУПАТЬ"
@@ -494,10 +385,8 @@ ${news[0]?.title || "Туманы скрывают новости"}
 
       stopLoss =
         last - atr;
-    }
 
-    // SELL
-    else if (
+    } else if (
       recommendation ===
       "🔴 ПРОДАВАТЬ"
     ) {
@@ -510,10 +399,8 @@ ${news[0]?.title || "Туманы скрывают новости"}
 
       stopLoss =
         last + atr;
-    }
 
-    // NEUTRAL
-    else {
+    } else {
 
       entryPrice = last;
 
@@ -523,8 +410,6 @@ ${news[0]?.title || "Туманы скрывают новости"}
       stopLoss =
         last - atr * 0.5;
     }
-
-    // ===== ВРЕМЯ =====
 
     const entryHour =
       8 +
@@ -542,12 +427,72 @@ ${news[0]?.title || "Туманы скрывают новости"}
     const exitTime =
       `${exitHour}:00 - ${exitHour + 2}:00`;
 
+    let oracleText = "";
+
+    try {
+
+      const prompt = `
+Ты древний крипто-оракул.
+
+Монета:
+${coin.name}
+
+Цена:
+${last.toFixed(2)}
+
+Сигнал:
+${recommendation}
+
+Уверенность:
+${confidence}%
+
+Напиши короткое мистическое пророчество.
+`;
+
+      const groqRes = await fetch(
+        "https://api.groq.com/openai/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+            Authorization:
+              `Bearer ${groqKey}`
+          },
+          body: JSON.stringify({
+            model:
+              "llama3-70b-8192",
+            messages: [
+              {
+                role: "user",
+                content: prompt
+              }
+            ],
+            temperature: 0.9
+          })
+        }
+      );
+
+      const groqJson =
+        await groqRes.json();
+
+      oracleText =
+        groqJson.choices?.[0]
+          ?.message?.content ||
+        "🌫 Оракул молчит.";
+
+    } catch {
+
+      oracleText =
+        "🌫 Потоки будущего скрыты.";
+    }
+
     return `
 🔮 ${coin.name.toUpperCase()} ORACLE
 
 ━━━━━━━━━━
 
-💰 Текущая цена:
+💰 Цена:
 $${last.toFixed(2)}
 
 📈 Изменение:
@@ -558,15 +503,18 @@ ${atrPercent.toFixed(2)}%
 
 ━━━━━━━━━━
 
-📊 Индикаторы:
+📊 RSI:
+${rsi.toFixed(2)}
 
-• RSI → ${rsi.toFixed(2)}
-• EMA20 → ${ema20.toFixed(2)}
-• EMA50 → ${ema50.toFixed(2)}
+📊 EMA20:
+${ema20.toFixed(2)}
+
+📊 EMA50:
+${ema50.toFixed(2)}
 
 ━━━━━━━━━━
 
-🧠 Рекомендация:
+🧠 Сигнал:
 ${recommendation}
 
 🎯 Уверенность:
@@ -574,35 +522,26 @@ ${confidence}%
 
 ━━━━━━━━━━
 
-⏰ Лучшее время входа:
+⏰ Вход:
 ${entryTime}
 
-💰 Оптимальный вход:
+💰 Точка входа:
 $${entryPrice.toFixed(2)}
 
 🎯 Цель:
 $${targetPrice.toFixed(2)}
 
-🛡 Стоп-лосс:
+🛡 Стоп:
 $${stopLoss.toFixed(2)}
-
-⏰ Фиксация прибыли:
-${exitTime}
 
 ━━━━━━━━━━
 
-📰 Последняя новость:
-
-${news[0]?.title || "Туманы скрывают новости"}
-
-🌌 День проходит под знаком:
-
-${strongestCoin.name}
+${oracleText}
 `;
   }
 
   // =====================
-  // РУНЫ
+  // RUNES
   // =====================
 
   const runes = [
@@ -615,7 +554,7 @@ ${strongestCoin.name}
   ];
 
   // =====================
-  // ГОРОСКОП
+  // HOROSCOPE
   // =====================
 
   const zodiacKeyboard = {
@@ -646,7 +585,7 @@ ${strongestCoin.name}
   };
 
   // =====================
-  // ГЛАВНОЕ МЕНЮ
+  // KEYBOARD
   // =====================
 
   const keyboard = {
@@ -702,11 +641,11 @@ ${strongestCoin.name}
   };
 
   // =====================
-  // DEFAULT SCREEN
+  // DEFAULT
   // =====================
 
   let reply = `
-🔮 CRYPTO NOSTRADAMUS
+🌌 CRYPTO NOSTRADAMUS
 
 ━━━━━━━━━━
 
@@ -726,44 +665,79 @@ ${strongestCoin.name.toUpperCase()}
   let currentKeyboard = keyboard;
 
   // =====================
+  // START
+  // =====================
+
+  if (
+    lowerText === "/start"
+  ) {
+
+    reply = `
+🌌 CRYPTO NOSTRADAMUS
+
+━━━━━━━━━━
+
+🌑 Потоки рынка активны.
+
+Используй панель
+оракула для анализа.
+`;
+  }
+
+  // =====================
   // SIGNALS
   // =====================
 
-  if (text.includes("btc")) {
+  else if (
+    lowerText.includes("btc")
+  ) {
+
     reply =
-      generateSignal(
+      await generateSignal(
         coins.btc,
         "btc"
       );
   }
 
-  if (text.includes("eth")) {
+  else if (
+    lowerText.includes("eth")
+  ) {
+
     reply =
-      generateSignal(
+      await generateSignal(
         coins.eth,
         "eth"
       );
   }
 
-  if (text.includes("bnb")) {
+  else if (
+    lowerText.includes("bnb")
+  ) {
+
     reply =
-      generateSignal(
+      await generateSignal(
         coins.bnb,
         "bnb"
       );
   }
 
-  if (text.includes("sol")) {
+  else if (
+    lowerText.includes("sol")
+  ) {
+
     reply =
-      generateSignal(
+      await generateSignal(
         coins.sol,
         "sol"
       );
   }
 
-  if (text.includes("xrp")) {
+  else if (
+    lowerText.includes("xrp")
+  ) {
+
     reply =
-      generateSignal(
+      await generateSignal(
         coins.xrp,
         "xrp"
       );
@@ -773,8 +747,8 @@ ${strongestCoin.name.toUpperCase()}
   // NEWS
   // =====================
 
-  if (
-    text.includes("news")
+  else if (
+    lowerText.includes("news")
   ) {
 
     reply = `
@@ -794,8 +768,8 @@ ${news
   // HOROSCOPE
   // =====================
 
-  if (
-    text.includes("horoscope")
+  else if (
+    lowerText.includes("horoscope")
   ) {
 
     reply = `
@@ -808,13 +782,15 @@ ${news
       zodiacKeyboard;
   }
 
-  for (const sign in horoscopeTexts) {
+  else {
 
-    if (
-      text.includes(sign)
-    ) {
+    for (const sign in horoscopeTexts) {
 
-      reply = `
+      if (
+        lowerText.includes(sign)
+      ) {
+
+        reply = `
 ${sign.toUpperCase()}
 
 ━━━━━━━━━━
@@ -828,8 +804,11 @@ ${60 + Math.floor(Math.random() * 35)}%
 ${strongestCoin.name}
 `;
 
-      currentKeyboard =
-        keyboard;
+        currentKeyboard =
+          keyboard;
+
+        break;
+      }
     }
   }
 
@@ -838,13 +817,13 @@ ${strongestCoin.name}
   // =====================
 
   if (
-    text.includes("runes")
+    lowerText.includes("runes")
   ) {
 
     const today =
       new Date()
-        .toISOString()
-        .slice(0, 10);
+      .toISOString()
+      .slice(0, 10);
 
     if (
       !userRunes[userId]
