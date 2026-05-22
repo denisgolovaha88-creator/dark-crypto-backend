@@ -1,22 +1,23 @@
 // ======================================================
-// 🌌 CRYPTO NOSTRADAMUS RU
+// 🌌 CRYPTO NOSTRADAMUS RU FINAL
 // ======================================================
-// FULL RUSSIAN EDITION
+// FULL WORKING RUSSIAN TELEGRAM BOT
 // ======================================================
 //
-// ✅ Полностью русский интерфейс
-// ✅ ENV API ключи
-// ✅ Promise.all
-// ✅ Настоящие OHLC свечи
-// ✅ Правильный EMA
-// ✅ Правильный RSI
-// ✅ Улучшенный ATR
-// ✅ Multi-timeframe логика
-// ✅ Rate limiting
-// ✅ Timeout защита
-// ✅ AI Oracle
-// ✅ Signal cache
-// ✅ Безопаснее и быстрее
+// ✅ РАБОТАЮЩИЕ КНОПКИ
+// ✅ ЦЕНЫ НА КНОПКАХ
+// ✅ РУССКИЙ ИНТЕРФЕЙС
+// ✅ SIGNAL ENGINE
+// ✅ AI ORACLE
+// ✅ RATE LIMIT
+// ✅ REAL OHLC
+// ✅ ATR / RSI / EMA
+// ✅ КЭШ
+// ✅ TIMEOUT
+// ✅ GROQ AI
+// ✅ NEWS
+// ✅ RUNES
+// ✅ HOROSCOPE
 //
 // ======================================================
 
@@ -25,19 +26,23 @@
 // ======================================================
 
 const TELEGRAM_TOKEN =
-  process.env.TELEGRAM_TOKEN || "8821653271:AAEHIe7QhmcOOjxQFJ6DT5WPjZU9hczuVP8";
+  process.env.TELEGRAM_TOKEN ||
+  "8821653271:AAEHIe7QhmcOOjxQFJ6DT5WPjZU9hczuVP8";
 
 const GROQ_API_KEY =
-  process.env.GROQ_API_KEY || "8821653271:AAEHIe7QhmcOOjxQFJ6DT5WPjZU9hczuVP8";
+  process.env.GROQ_API_KEY ||
+  "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";
 
 const GNEWS_API_KEY =
-  process.env.GNEWS_API_KEY || "80d3a911a8c4d3ffe9d4b2dce9b8fdc8";
+  process.env.GNEWS_API_KEY ||
+  "80d3a911a8c4d3ffe9d4b2dce9b8fdc8";
 
 const COININDEX_API_KEY =
-  process.env.COININDEX_API_KEY || "3cb3bc0dde8ee347745043db6ab2b5b06bb4e6fd55205549f6e6452dfc590f2a";
+  process.env.COININDEX_API_KEY ||
+  "3cb3bc0dde8ee347745043db6ab2b5b06bb4e6fd55205549f6e6452dfc590f2a";
 
 // ======================================================
-// GLOBAL MEMORY
+// GLOBALS
 // ======================================================
 
 global.marketCache =
@@ -58,12 +63,16 @@ global.userRunes =
 
 module.exports = async (req, res) => {
 
+  // ====================================================
+  // GET
+  // ====================================================
+
   if (req.method !== "POST") {
 
     return res
       .status(200)
       .send(
-        "🌌 CRYPTO NOSTRADAMUS АКТИВЕН"
+        "🌌 CRYPTO NOSTRADAMUS ONLINE"
       );
   }
 
@@ -154,7 +163,7 @@ module.exports = async (req, res) => {
     const controller =
       new AbortController();
 
-    const id =
+    const timer =
       setTimeout(
         () => controller.abort(),
         timeout
@@ -172,13 +181,13 @@ module.exports = async (req, res) => {
           }
         );
 
-      clearTimeout(id);
+      clearTimeout(timer);
 
       return response;
 
     } catch (e) {
 
-      clearTimeout(id);
+      clearTimeout(timer);
 
       throw e;
     }
@@ -213,7 +222,8 @@ module.exports = async (req, res) => {
 
     global.marketCache[key] = {
 
-      timestamp: now,
+      timestamp:
+        now,
 
       data
     };
@@ -432,55 +442,55 @@ module.exports = async (req, res) => {
       [
         {
           text:
-            "₿ BTC"
+            `₿ BTC $${prices.bitcoin.usd}`
         },
 
         {
           text:
-            "⚡ ETH"
+            `⚡ ETH $${prices.ethereum.usd}`
         }
       ],
 
       [
         {
           text:
-            "🟡 BNB"
+            `🟡 BNB $${prices.binancecoin.usd}`
         },
 
         {
           text:
-            "🟣 SOL"
+            `🟣 SOL $${prices.solana.usd}`
         }
       ],
 
       [
         {
           text:
-            "🔵 XRP"
+            `🔵 XRP $${prices.ripple.usd}`
         },
 
         {
           text:
-            "🌑 СИГНАЛ"
+            `🌑 СИГНАЛ`
         }
       ],
 
       [
         {
           text:
-            "📰 НОВОСТИ"
+            `📰 НОВОСТИ`
         },
 
         {
           text:
-            "🔮 РУНЫ"
+            `🔮 РУНЫ`
         }
       ],
 
       [
         {
           text:
-            "♈ ГОРОСКОП"
+            `♈ ГОРОСКОП`
         }
       ]
     ],
@@ -631,30 +641,6 @@ module.exports = async (req, res) => {
         0
       ) / recent.length
     );
-  }
-
-  // ====================================================
-  // TREND SCORE
-  // ====================================================
-
-  function trendScore(
-    ema20,
-    ema50,
-    rsi
-  ) {
-
-    let score = 0;
-
-    if (ema20 > ema50)
-      score += 1;
-
-    if (rsi > 55)
-      score += 1;
-
-    if (rsi < 45)
-      score -= 1;
-
-    return score;
   }
 
   // ====================================================
@@ -852,11 +838,6 @@ ${String(
         ? "ЛОНГ"
         : "ШОРТ";
 
-    const volatility =
-      (
-        atr / price * 100
-      );
-
     let entry;
     let target;
     let stop;
@@ -913,23 +894,10 @@ ${String(
         )
       );
 
-    const score =
-      trendScore(
-        ema20,
-        ema50,
-        rsi
-      );
-
-    let trend =
-      "БАЛАНС РЫНКА";
-
-    if (score >= 2)
-      trend =
-        "СИЛЬНЫЙ БЫЧИЙ";
-
-    if (score <= -1)
-      trend =
-        "СИЛЬНЫЙ МЕДВЕЖИЙ";
+    const volatility =
+      (
+        atr / price * 100
+      ).toFixed(2);
 
     const oracle =
       await aiOracle({
@@ -970,12 +938,9 @@ ${ema20.toFixed(2)}
 ${ema50.toFixed(2)}
 
 🌊 Волатильность:
-${volatility.toFixed(2)}%
+${volatility}%
 
 ━━━━━━━━━━
-
-🧭 Тренд:
-${trend}
 
 🔥 Уверенность:
 ${confidence}%
@@ -1121,8 +1086,7 @@ ${sentiment.mood || "НЕЙТРАЛЬНО"}
   // ====================================================
 
   if (
-    text === "📰 новости" ||
-    text === "новости"
+    text.includes("новости")
   ) {
 
     let msg =
@@ -1139,7 +1103,10 @@ ${sentiment.mood || "НЕЙТРАЛЬНО"}
         `• ${n.title}\n\n`;
     });
 
-    await sendMessage(msg);
+    await sendMessage(
+      msg,
+      keyboard
+    );
 
     return res
       .status(200)
@@ -1151,8 +1118,7 @@ ${sentiment.mood || "НЕЙТРАЛЬНО"}
   // ====================================================
 
   if (
-    text === "🔮 руны" ||
-    text === "руны"
+    text.includes("руны")
   ) {
 
     const today =
@@ -1166,7 +1132,8 @@ ${sentiment.mood || "НЕЙТРАЛЬНО"}
     ) {
 
       await sendMessage(
-        global.userRunes[userId].text
+        global.userRunes[userId].text,
+        keyboard
       );
 
       return res
@@ -1191,7 +1158,10 @@ ${sentiment.mood || "НЕЙТРАЛЬНО"}
         rune
     };
 
-    await sendMessage(rune);
+    await sendMessage(
+      rune,
+      keyboard
+    );
 
     return res
       .status(200)
@@ -1203,8 +1173,7 @@ ${sentiment.mood || "НЕЙТРАЛЬНО"}
   // ====================================================
 
   if (
-    text === "♈ гороскоп" ||
-    text === "гороскоп"
+    text.includes("гороскоп")
   ) {
 
     await sendMessage(
@@ -1212,7 +1181,8 @@ ${sentiment.mood || "НЕЙТРАЛЬНО"}
 ♈ Выбери знак:
 
 Овен
-`
+`,
+      keyboard
     );
 
     return res
@@ -1225,7 +1195,8 @@ ${sentiment.mood || "НЕЙТРАЛЬНО"}
   ) {
 
     await sendMessage(
-      horoscope[text]
+      horoscope[text],
+      keyboard
     );
 
     return res
@@ -1238,8 +1209,7 @@ ${sentiment.mood || "НЕЙТРАЛЬНО"}
   // ====================================================
 
   if (
-    text === "🌑 сигнал" ||
-    text === "сигнал"
+    text.includes("сигнал")
   ) {
 
     await sendMessage(
@@ -1251,7 +1221,8 @@ ETH
 BNB
 SOL
 XRP
-`
+`,
+      keyboard
     );
 
     return res
@@ -1262,6 +1233,43 @@ XRP
   // ====================================================
   // SIGNAL ROUTER
   // ====================================================
+
+  let symbol = null;
+
+  if (
+    text.includes("btc")
+  ) {
+
+    symbol = "btc";
+  }
+
+  else if (
+    text.includes("eth")
+  ) {
+
+    symbol = "eth";
+  }
+
+  else if (
+    text.includes("bnb")
+  ) {
+
+    symbol = "bnb";
+  }
+
+  else if (
+    text.includes("sol")
+  ) {
+
+    symbol = "sol";
+  }
+
+  else if (
+    text.includes("xrp")
+  ) {
+
+    symbol = "xrp";
+  }
 
   const routes = {
 
@@ -1281,15 +1289,7 @@ XRP
       "ripple"
   };
 
-  const clean =
-    text.replace(
-      /[^\w]/g,
-      ""
-    );
-
-  if (
-    routes[clean]
-  ) {
+  if (symbol) {
 
     if (
       cooldown(
@@ -1304,7 +1304,8 @@ XRP
 ⏳ Потоки перегреты.
 
 Подожди 10 секунд.
-`
+`,
+        keyboard
       );
 
       return res
@@ -1314,11 +1315,14 @@ XRP
 
     const signal =
       await buildSignal(
-        clean.toUpperCase(),
-        routes[clean]
+        symbol.toUpperCase(),
+        routes[symbol]
       );
 
-    await sendMessage(signal);
+    await sendMessage(
+      signal,
+      keyboard
+    );
 
     return res
       .status(200)
