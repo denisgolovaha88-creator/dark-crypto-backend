@@ -233,7 +233,7 @@ async function handler(
     // START
 
     if (
-      text === "/start"
+      text === "/START"
     ) {
 
       const mood =
