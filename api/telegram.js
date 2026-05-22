@@ -219,7 +219,8 @@ async function handler(
       message.chat.id;
 
     const text =
-      message.text || "";
+  (message.text || "")
+    .toUpperCase();
 
     const market =
       await getMarketData();
