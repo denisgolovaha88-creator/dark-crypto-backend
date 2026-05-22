@@ -163,11 +163,11 @@ async function handler(
     const chatId =
       message.chat.id;
 
-    const rawText =
+    const text =
       message.text || "";
 
-    const text =
-      rawText.toUpperCase();
+    const upperText =
+      text.toUpperCase();
 
     const market =
       await getMarketData();
@@ -180,7 +180,7 @@ async function handler(
     // START
 
     if (
-      text === "/START"
+      upperText === "/START"
     ) {
 
       await sendMessage(
@@ -216,10 +216,7 @@ ${getMarketMood()}
     // BTC
 
     else if (
-
-      text.includes("BTC") ||
-      text === "/BTC"
-
+      upperText.includes("BTC")
     ) {
 
       try {
@@ -254,10 +251,7 @@ ${getMarketMood()}
     // ETH
 
     else if (
-
-      text.includes("ETH") ||
-      text === "/ETH"
-
+      upperText.includes("ETH")
     ) {
 
       try {
@@ -287,10 +281,7 @@ ${getMarketMood()}
     // BNB
 
     else if (
-
-      text.includes("BNB") ||
-      text === "/BNB"
-
+      upperText.includes("BNB")
     ) {
 
       try {
@@ -320,10 +311,7 @@ ${getMarketMood()}
     // SOL
 
     else if (
-
-      text.includes("SOL") ||
-      text === "/SOL"
-
+      upperText.includes("SOL")
     ) {
 
       try {
@@ -353,10 +341,7 @@ ${getMarketMood()}
     // XRP
 
     else if (
-
-      text.includes("XRP") ||
-      text === "/XRP"
-
+      upperText.includes("XRP")
     ) {
 
       try {
@@ -381,6 +366,28 @@ ${getMarketMood()}
           "⚠️ XRP сигнал скрыт туманом."
         );
       }
+    }
+
+    // SIGNAL
+
+    else if (
+      text === "🌑 SIGNAL"
+    ) {
+
+      await sendMessage(
+
+        chatId,
+
+`
+🌌 Выбери монету:
+
+BTC
+ETH
+BNB
+SOL
+XRP
+`
+      );
     }
 
     // NEWS
@@ -417,6 +424,11 @@ ${getMarketMood()}
 
       } catch (e) {
 
+        console.log(
+          "NEWS ERROR",
+          e
+        );
+
         await sendMessage(
 
           chatId,
@@ -432,44 +444,46 @@ ${getMarketMood()}
       text === "🔮 RUNES"
     ) {
 
-      const today =
-        new Date()
-          .toDateString();
+      try {
 
-      if (
+        const today =
+          new Date()
+            .toDateString();
 
-        runeCooldowns[
-          chatId
-        ] &&
-
-        runeCooldowns[
-          chatId
-        ].date === today
-      ) {
-
-        await sendMessage(
-
-          chatId,
+        if (
 
           runeCooldowns[
             chatId
-          ].text
-        );
+          ] &&
 
-        return res
-          .status(200)
-          .send("ok");
-      }
+          runeCooldowns[
+            chatId
+          ].date === today
+        ) {
 
-      const rune =
-        runes[
-          Math.floor(
-            Math.random() *
-            runes.length
-          )
-        ];
+          await sendMessage(
 
-      const runeText =
+            chatId,
+
+            runeCooldowns[
+              chatId
+            ].text
+          );
+
+          return res
+            .status(200)
+            .send("ok");
+        }
+
+        const rune =
+          runes[
+            Math.floor(
+              Math.random() *
+              runes.length
+            )
+          ];
+
+        const runeText =
 `
 🔮 РУНА ДНЯ
 
@@ -483,21 +497,36 @@ ${rune.name}
 ${rune.text}
 `;
 
-      runeCooldowns[
-        chatId
-      ] = {
+        runeCooldowns[
+          chatId
+        ] = {
 
-        date:
-          today,
+          date:
+            today,
 
-        text:
+          text:
+            runeText
+        };
+
+        await sendMessage(
+          chatId,
           runeText
-      };
+        );
 
-      await sendMessage(
-        chatId,
-        runeText
-      );
+      } catch (e) {
+
+        console.log(
+          "RUNE ERROR",
+          e
+        );
+
+        await sendMessage(
+
+          chatId,
+
+          "⚠️ Руны молчат."
+        );
+      }
     }
 
     // HOROSCOPE
@@ -513,21 +542,23 @@ ${rune.text}
 `
 ♈ Выбери знак:
 
-ОВЕН
-ТЕЛЕЦ
-БЛИЗНЕЦЫ
-РАК
-ЛЕВ
-ДЕВА
-ВЕСЫ
-СКОРПИОН
-СТРЕЛЕЦ
-КОЗЕРОГ
-ВОДОЛЕЙ
-РЫБЫ
+Овен
+Телец
+Близнецы
+Рак
+Лев
+Дева
+Весы
+Скорпион
+Стрелец
+Козерог
+Водолей
+Рыбы
 `
       );
     }
+
+    // HOROSCOPE SIGNS
 
     else if (
       horoscope[text]
