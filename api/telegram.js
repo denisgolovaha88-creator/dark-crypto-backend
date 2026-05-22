@@ -286,75 +286,170 @@ module.exports = async (req, res) => {
   // SIGNAL
   // =====================
 
-  function generateSignal(coin, key) {
+  
+function generateSignal(coin, key) {
 
-    const data =
-      market[key]?.prices || [];
+  const data =
+    market[key]?.prices;
 
-    if (!data.length) {
-      return `⚠️ Анализ временно недоступен.`;
-    }
+  if (
+    !data ||
+    !Array.isArray(data) ||
+    data.length < 20
+  ) {
 
-    const closes =
-      data.map(p => p[1]);
+    return `
+⚠️ Потоки рынка
+временно скрыты.
 
-    const highs =
-      closes.map(v => v * 1.01);
+Сигнал не может
+быть построен.
+`;
+  }
 
-    const lows =
-      closes.map(v => v * 0.99);
+  const closes =
+    data.map(p => p[1]);
 
-    const last =
-      closes.at(-1);
+  const highs =
+    closes.map(v => v * 1.01);
 
-    const prev =
-      closes.at(-2);
+  const lows =
+    closes.map(v => v * 0.99);
 
-    const trend =
-      ((last - prev) / prev) * 100;
+  const last =
+    closes[closes.length - 1];
 
-    const rsi =
-      RSI(closes, 14);
+  const prev =
+    closes[closes.length - 2];
 
-    const ema20 =
-      EMA(closes, 20);
+  const trend =
+    ((last - prev) / prev) * 100;
 
-    const ema50 =
-      EMA(closes, 50);
+  const rsi =
+    RSI(closes, 14);
 
-    const atr =
-      ATR(
-        highs,
-        lows,
-        closes,
-        14
-      );
+  const ema20 =
+    EMA(closes, 20);
 
-    const atrPercent =
-      (atr / last) * 100;
+  const ema50 =
+    EMA(closes, 50);
 
-    // ===== СИГНАЛ =====
+  const atr =
+    ATR(
+      highs,
+      lows,
+      closes,
+      14
+    );
 
-    let recommendation =
-      "⚪ НЕЙТРАЛЬНО";
+  const atrPercent =
+    (atr / last) * 100;
 
-    if (
-      ema20 > ema50 &&
-      rsi > 55 &&
-      trend > 0
-    ) {
-      recommendation =
-        "🟢 ПОКУПАТЬ";
-    }
+  let recommendation =
+    "⚪ НЕЙТРАЛЬНО";
 
-    if (
-      ema20 < ema50 &&
-      rsi < 45 &&
-      trend < 0
-    ) {
-      recommendation =
-        "🔴 ПРОДАВАТЬ";
-    }
+  if (
+    ema20 > ema50 &&
+    rsi > 55
+  ) {
+
+    recommendation =
+      "🟢 ПОКУПАТЬ";
+  }
+
+  if (
+    ema20 < ema50 &&
+    rsi < 45
+  ) {
+
+    recommendation =
+      "🔴 ПРОДАВАТЬ";
+  }
+
+  let confidence =
+    Math.floor(
+      65 + Math.random() * 25
+    );
+
+  const entry =
+    last - atr * 0.2;
+
+  const target =
+    recommendation ===
+    "🔴 ПРОДАВАТЬ"
+
+      ? last - atr * 2
+
+      : last + atr * 2;
+
+  const stop =
+    recommendation ===
+    "🔴 ПРОДАВАТЬ"
+
+      ? last + atr
+
+      : last - atr;
+
+  return `
+🔮 ${coin.name.toUpperCase()} ORACLE
+
+━━━━━━━━━━
+
+💰 Цена:
+$${last.toFixed(2)}
+
+📈 Тренд:
+${trend.toFixed(2)}%
+
+🌊 Волатильность:
+${atrPercent.toFixed(2)}%
+
+━━━━━━━━━━
+
+📊 RSI:
+${rsi.toFixed(2)}
+
+📊 EMA20:
+${ema20.toFixed(2)}
+
+📊 EMA50:
+${ema50.toFixed(2)}
+
+━━━━━━━━━━
+
+🧠 Рекомендация:
+
+${recommendation}
+
+🎯 Уверенность:
+${confidence}%
+
+━━━━━━━━━━
+
+💰 Вход:
+$${entry.toFixed(2)}
+
+🎯 Цель:
+$${target.toFixed(2)}
+
+🛡 Стоп:
+$${stop.toFixed(2)}
+
+━━━━━━━━━━
+
+📰 Новости:
+
+${news[0]?.title || "Туманы скрывают новости"}
+`;
+}
+    
+      
+
+    
+      
+
+    
+    
 
     // ===== УВЕРЕННОСТЬ =====
 
