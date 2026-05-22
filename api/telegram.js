@@ -276,20 +276,35 @@ ${mood}
     // BTC
 
     else if (
-      text.includes("BTC")
-    ) {
+  text.includes("BTC")
+) {
 
-      const signal =
-        await buildSignal(
-          "BTC",
-          market.BTC
-        );
+  try {
 
-      await sendMessage(
-        chatId,
-        signal
+    const signal =
+      await buildSignal(
+        "BTC",
+        market.BTC
       );
-    }
+
+    await sendMessage(
+      chatId,
+      signal
+    );
+
+  } catch (e) {
+
+    console.log(
+      "SIGNAL ERROR",
+      e
+    );
+
+    await sendMessage(
+      chatId,
+      "⚠️ Сигнал временно скрыт туманом."
+    );
+  }
+}
 
     // ETH
 
