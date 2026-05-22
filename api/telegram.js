@@ -126,61 +126,6 @@ function buildKeyboard(
   };
 }
 
-function getCoinOfDay(
-  market
-) {
-
-  const coins = [
-
-    {
-      name:
-        "Bitcoin",
-
-      value:
-        market.BTC
-    },
-
-    {
-      name:
-        "Ethereum",
-
-      value:
-        market.ETH
-    },
-
-    {
-      name:
-        "BNB",
-
-      value:
-        market.BNB
-    },
-
-    {
-      name:
-        "Solana",
-
-      value:
-        market.SOL
-    },
-
-    {
-      name:
-        "XRP",
-
-      value:
-        market.XRP
-    }
-  ];
-
-  coins.sort(
-    (a, b) =>
-      b.value - a.value
-  );
-
-  return coins[0].name;
-}
-
 module.exports =
 async function handler(
   req,
@@ -218,9 +163,11 @@ async function handler(
     const chatId =
       message.chat.id;
 
+    const rawText =
+      message.text || "";
+
     const text =
-  (message.text || "")
-    .toUpperCase();
+      rawText.toUpperCase();
 
     const market =
       await getMarketData();
@@ -236,14 +183,6 @@ async function handler(
       text === "/START"
     ) {
 
-      const mood =
-        getMarketMood();
-
-      const coin =
-        getCoinOfDay(
-          market
-        );
-
       await sendMessage(
 
         chatId,
@@ -256,11 +195,11 @@ async function handler(
 🌑 День проходит
 под знаком:
 
-${coin}
+Bitcoin
 
 ━━━━━━━━━━
 
-${mood}
+${getMarketMood()}
 
 ━━━━━━━━━━
 
@@ -277,128 +216,171 @@ ${mood}
     // BTC
 
     else if (
-  text.includes("BTC")
-) {
 
-  try {
+      text.includes("BTC") ||
+      text === "/BTC"
 
-    const signal =
-      await buildSignal(
-        "BTC",
-        market.BTC
-      );
+    ) {
 
-    await sendMessage(
-      chatId,
-      signal
-    );
+      try {
 
-  } catch (e) {
+        const signal =
+          await buildSignal(
+            "BTC",
+            market.BTC
+          );
 
-    console.log(
-      "SIGNAL ERROR",
-      e
-    );
+        await sendMessage(
+          chatId,
+          signal
+        );
 
-    await sendMessage(
-      chatId,
-      "⚠️ Сигнал временно скрыт туманом."
-    );
-  }
-}
+      } catch (e) {
+
+        console.log(
+          "BTC ERROR",
+          e
+        );
+
+        await sendMessage(
+
+          chatId,
+
+          "⚠️ BTC сигнал скрыт туманом."
+        );
+      }
+    }
 
     // ETH
 
     else if (
-      text.includes("ETH")
+
+      text.includes("ETH") ||
+      text === "/ETH"
+
     ) {
 
-      const signal =
-        await buildSignal(
-          "ETH",
-          market.ETH
+      try {
+
+        const signal =
+          await buildSignal(
+            "ETH",
+            market.ETH
+          );
+
+        await sendMessage(
+          chatId,
+          signal
         );
 
-      await sendMessage(
-        chatId,
-        signal
-      );
+      } catch (e) {
+
+        await sendMessage(
+
+          chatId,
+
+          "⚠️ ETH сигнал скрыт туманом."
+        );
+      }
     }
 
     // BNB
 
     else if (
-      text.includes("BNB")
+
+      text.includes("BNB") ||
+      text === "/BNB"
+
     ) {
 
-      const signal =
-        await buildSignal(
-          "BNB",
-          market.BNB
+      try {
+
+        const signal =
+          await buildSignal(
+            "BNB",
+            market.BNB
+          );
+
+        await sendMessage(
+          chatId,
+          signal
         );
 
-      await sendMessage(
-        chatId,
-        signal
-      );
+      } catch (e) {
+
+        await sendMessage(
+
+          chatId,
+
+          "⚠️ BNB сигнал скрыт туманом."
+        );
+      }
     }
 
     // SOL
 
     else if (
-      text.includes("SOL")
+
+      text.includes("SOL") ||
+      text === "/SOL"
+
     ) {
 
-      const signal =
-        await buildSignal(
-          "SOL",
-          market.SOL
+      try {
+
+        const signal =
+          await buildSignal(
+            "SOL",
+            market.SOL
+          );
+
+        await sendMessage(
+          chatId,
+          signal
         );
 
-      await sendMessage(
-        chatId,
-        signal
-      );
+      } catch (e) {
+
+        await sendMessage(
+
+          chatId,
+
+          "⚠️ SOL сигнал скрыт туманом."
+        );
+      }
     }
 
     // XRP
 
     else if (
-      text.includes("XRP")
+
+      text.includes("XRP") ||
+      text === "/XRP"
+
     ) {
 
-      const signal =
-        await buildSignal(
-          "XRP",
-          market.XRP
+      try {
+
+        const signal =
+          await buildSignal(
+            "XRP",
+            market.XRP
+          );
+
+        await sendMessage(
+          chatId,
+          signal
         );
 
-      await sendMessage(
-        chatId,
-        signal
-      );
-    }
+      } catch (e) {
 
-    // SIGNAL
+        await sendMessage(
 
-    else if (
-      text === "🌑 SIGNAL"
-    ) {
+          chatId,
 
-      await sendMessage(
-
-        chatId,
-
-`
-🌌 Выбери монету:
-
-BTC
-ETH
-BNB
-SOL
-XRP
-`
-      );
+          "⚠️ XRP сигнал скрыт туманом."
+        );
+      }
     }
 
     // NEWS
@@ -407,29 +389,41 @@ XRP
       text === "📰 NEWS"
     ) {
 
-      const news =
-        await getNews();
+      try {
 
-      let newsText =
+        const news =
+          await getNews();
+
+        let newsText =
 `
-📰 CRYPTO NEWS STREAM
+📰 CRYPTO NEWS
 
 ━━━━━━━━━━
 
 `;
 
-      news.forEach(
-        item => {
+        news.forEach(
+          item => {
 
-          newsText +=
-            `• ${item.title}\n\n`;
-        }
-      );
+            newsText +=
+              `• ${item.title}\n\n`;
+          }
+        );
 
-      await sendMessage(
-        chatId,
-        newsText
-      );
+        await sendMessage(
+          chatId,
+          newsText
+        );
+
+      } catch (e) {
+
+        await sendMessage(
+
+          chatId,
+
+          "⚠️ Новости скрыты туманом."
+        );
+      }
     }
 
     // RUNES
@@ -519,30 +513,25 @@ ${rune.text}
 `
 ♈ Выбери знак:
 
-Овен
-Телец
-Близнецы
-Рак
-Лев
-Дева
-Весы
-Скорпион
-Стрелец
-Козерог
-Водолей
-Рыбы
+ОВЕН
+ТЕЛЕЦ
+БЛИЗНЕЦЫ
+РАК
+ЛЕВ
+ДЕВА
+ВЕСЫ
+СКОРПИОН
+СТРЕЛЕЦ
+КОЗЕРОГ
+ВОДОЛЕЙ
+РЫБЫ
 `
       );
     }
 
-    // HOROSCOPE SIGNS
-
     else if (
       horoscope[text]
     ) {
-
-      const mood =
-        getMarketMood();
 
       await sendMessage(
 
@@ -554,12 +543,6 @@ ${rune.text}
 ━━━━━━━━━━
 
 ${horoscope[text]}
-
-━━━━━━━━━━
-
-🌌 Энергия рынка:
-
-${mood}
 `
       );
     }
@@ -578,11 +561,6 @@ ${mood}
 👥 Приглашение:
 
 https://t.me/ТВОЙ_БОТ
-
-━━━━━━━━━━
-
-🌌 Открой доступ
-к потокам пророчества.
 `
       );
     }
@@ -594,10 +572,9 @@ https://t.me/ТВОЙ_БОТ
   } catch (e) {
 
     console.log(
-  "GLOBAL ERROR",
-  e.message,
-  e.stack
-);
+      "GLOBAL ERROR",
+      e
+    );
 
     return res
       .status(200)
