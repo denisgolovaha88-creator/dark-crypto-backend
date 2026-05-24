@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/bot?cron=sol-alert",
+      "schedule": "*/10 * * * *"
+    }
+  ]
+}
