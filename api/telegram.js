@@ -61,6 +61,357 @@ global.userCooldowns =
 global.userRunes =
   global.userRunes || {};
 
+// ==================================================
+// ORACLE ALERT ENGINE
+// ==================================================
+
+async function getAlertUsers() {
+
+  try {
+
+    const r =
+      await safeFetch(
+
+        `${SUPABASE_URL}/rest/v1/oracle_alerts?active=eq.true`,
+
+        {
+          headers: {
+
+            apikey:
+              SUPABASE_KEY,
+
+            Authorization:
+              `Bearer ${SUPABASE_KEY}`
+          }
+        }
+      );
+
+    return await r.json();
+
+  } catch (e) {
+
+    console.log(
+      "ALERT LOAD ERROR",
+      e
+    );
+
+    return [];
+  }
+}
+
+// ==================================================
+// SEND ALERT
+// ==================================================
+
+async function sendAlert(
+  chatId,
+  text
+) {
+
+  try {
+
+    await fetch(
+
+      `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`,
+
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json"
+        },
+
+        body: JSON.stringify({
+
+          chat_id:
+            chatId,
+
+          text,
+
+          parse_mode:
+            "HTML"
+        })
+      }
+    );
+
+  } catch (e) {
+
+    console.log(
+      "ALERT SEND ERROR",
+      e
+    );
+  }
+}
+
+// ==================================================
+// CHECK SOL SIGNAL
+// ==================================================
+
+async function checkSOLSignal() {
+
+  try {
+
+    const candles =
+      await getOHLC(
+        "solana"
+      );
+
+    if (
+      !candles?.length
+    ) {
+
+      return;
+    }
+
+    const closes =
+      candles.map(
+        c => c[4]
+      );
+
+    const highs =
+      candles.map(
+        c => c[2]
+      );
+
+    const lows =
+      candles.map(
+        c => c[3]
+      );
+
+    const price =
+      closes.at(-1);
+
+    // ==================================================
+    // SIMPLE EMA
+    // ==================================================
+
+    const ema20 =
+      closes
+        .slice(-20)
+        .reduce(
+          (a, b) => a + b,
+          0
+        ) / 20;
+
+    const ema50 =
+      closes
+        .slice(-50)
+        .reduce(
+          (a, b) => a + b,
+          0
+        ) / 50;
+
+    // ==================================================
+    // RSI
+    // ==================================================
+
+    let gains = 0;
+    let losses = 0;
+
+    for (
+      let i =
+        closes.length - 14;
+      i < closes.length;
+      i++
+    ) {
+
+      const diff =
+        closes[i] -
+        closes[i - 1];
+
+      if (diff > 0) {
+
+        gains += diff;
+
+      } else {
+
+        losses += Math.abs(diff);
+      }
+    }
+
+    const rs =
+      gains / (losses || 1);
+
+    const rsi =
+      100 -
+      100 / (1 + rs);
+
+    // ==================================================
+    // SIGNAL CONDITIONS
+    // ==================================================
+
+    const bullish =
+      ema20 > ema50;
+
+    const oversold =
+      rsi < 42;
+
+    if (
+      !bullish ||
+      !oversold
+    ) {
+
+      return;
+    }
+
+    // ==================================================
+    // LEVELS
+    // ==================================================
+
+    const support =
+      Math.min(
+        ...lows.slice(-20)
+      );
+
+    const resistance =
+      Math.max(
+        ...highs.slice(-20)
+      );
+
+    const entry1 =
+      (
+        support + 0.3
+      ).toFixed(2);
+
+    const entry2 =
+      (
+        support + 1.2
+      ).toFixed(2);
+
+    const target =
+      resistance.toFixed(2);
+
+    const stop =
+      (
+        support - 2
+      ).toFixed(2);
+
+    const confidence =
+      Math.min(
+        97,
+        Math.floor(
+          70 +
+          (
+            Math.abs(
+              ema20 - ema50
+            ) / price
+          ) * 1000
+        )
+      );
+
+    // ==================================================
+    // ALERT USERS
+    // ==================================================
+
+    const users =
+      await getAlertUsers();
+
+    if (
+      !users?.length
+    ) {
+
+      return;
+    }
+
+    // ==================================================
+    // MYSTIC TEXTS
+    // ==================================================
+
+    const visions = [
+
+`
+🔮 Мне было видение.
+
+Если ты ждал знака —
+это он.
+`,
+
+`
+🌌 Потоки эфира
+изменились.
+
+Тьма ослабила хватку.
+`,
+
+`
+⚡ Киты начали движение.
+
+Скрытая энергия
+усиливает SOLANA.
+`
+    ];
+
+    const prophecy =
+      visions[
+        Math.floor(
+          Math.random() *
+          visions.length
+        )
+      ];
+
+    // ==================================================
+    // SEND
+    // ==================================================
+
+    for (
+      const u of users
+    ) {
+
+      await sendAlert(
+
+        u.telegram_id,
+
+`
+🌌 SOLANA ORACLE ALERT
+
+━━━━━━━━━━
+
+${prophecy}
+
+━━━━━━━━━━
+
+💰 Цена:
+$${price.toFixed(2)}
+
+📈 Направление:
+ЛОНГ
+
+🔥 Уверенность:
+${confidence}%
+
+━━━━━━━━━━
+
+🎯 Вход:
+$${entry1} - $${entry2}
+
+💎 Фиксация:
+$${target}
+
+🛡 Стоп:
+$${stop}
+
+━━━━━━━━━━
+
+⌛ Ожидаемое движение:
+4-12 часов
+
+━━━━━━━━━━
+
+⚠️ Возможен ложный импульс
+перед основным движением.
+`
+      );
+    }
+
+  } catch (e) {
+
+    console.log(
+      "SOL SIGNAL ERROR",
+      e
+    );
+  }
+}
 // ======================================================
 // EXPORT
 // ======================================================
