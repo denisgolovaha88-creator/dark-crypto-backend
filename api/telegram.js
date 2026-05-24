@@ -886,7 +886,7 @@ const rune =
 };
 
       await sendMessage(
-        rune,
+        rune.text,
         keyboard
       );
 
