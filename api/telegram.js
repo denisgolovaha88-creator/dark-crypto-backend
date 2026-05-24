@@ -852,19 +852,38 @@ $${prices.ripple.usd}
           .end();
       }
 
-      const rune =
-        runeList[
-          Math.floor(
-            Math.random() *
-            runeList.length
-          )
-        ];
+      const previousRune =
+  global.userRunes[userId]?.runeId;
 
-      global.userRunes[userId] = {
+let availableRunes =
+  runeList.filter(
+    r => r.id !== previousRune
+  );
 
-        date:
-          today
-      };
+if (
+  !availableRunes.length
+) {
+
+  availableRunes =
+    runeList;
+}
+
+const rune =
+  availableRunes[
+    Math.floor(
+      Math.random() *
+      availableRunes.length
+    )
+  ];
+        
+    global.userRunes[userId] = {
+
+  date:
+    today,
+
+  runeId:
+    rune.id
+};
 
       await sendMessage(
         rune,
