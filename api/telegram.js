@@ -894,75 +894,348 @@ ${link}
     // SIGNAL ENGINE
     // ==================================================
 
-    if (symbol) {
+    // ==================================================
+// SIGNAL ENGINE
+// ==================================================
 
-      const candles =
-        await getOHLC(symbol);
+if (symbol) {
 
-      if (
-        !candles?.length
-      ) {
+  const candles =
+    await getOHLC(symbol);
 
-        await sendMessage(
+  if (!candles?.length) {
+
+    await sendMessage(
 
 `
 ⚠️ Потоки анализа разрушены.
 `,
 
-          keyboard
-        );
+      keyboard
+    );
 
-        return res
-          .status(200)
-          .end();
+    return res
+      .status(200)
+      .end();
+  }
+
+  // ================================================
+  // DATA
+  // ================================================
+
+  const closes =
+    candles.map(c => c[4]);
+
+  const highs =
+    candles.map(c => c[2]);
+
+  const lows =
+    candles.map(c => c[3]);
+
+  const price =
+    closes.at(-1);
+
+  // ================================================
+  // INDICATORS
+  // ================================================
+
+  function EMA(data, period) {
+
+    const k =
+      2 / (period + 1);
+
+    let ema =
+      data[0];
+
+    for (
+      let i = 1;
+      i < data.length;
+      i++
+    ) {
+
+      ema =
+        data[i] * k +
+        ema * (1 - k);
+    }
+
+    return ema;
+  }
+
+  function RSI(data, period = 14) {
+
+    let gains = 0;
+    let losses = 0;
+
+    for (
+      let i = data.length - period;
+      i < data.length;
+      i++
+    ) {
+
+      const diff =
+        data[i] - data[i - 1];
+
+      if (diff > 0) {
+
+        gains += diff;
+
+      } else {
+
+        losses += Math.abs(diff);
       }
+    }
 
-      const closes =
-        candles.map(
-          c => c[4]
-        );
+    const rs =
+      gains / (losses || 1);
 
-      const highs =
-        candles.map(
-          c => c[2]
-        );
+    return (
+      100 -
+      100 / (1 + rs)
+    );
+  }
 
-      const lows =
-        candles.map(
-          c => c[3]
-        );
+  function ATR(
+    highs,
+    lows,
+    closes,
+    period = 14
+  ) {
 
-      const price =
-        closes.at(-1);
+    let trs = [];
 
-      const high =
-        Math.max(...highs);
+    for (
+      let i = 1;
+      i < closes.length;
+      i++
+    ) {
 
-      const low =
-        Math.min(...lows);
+      const tr = Math.max(
 
-      const entry =
-        (
-          price * 0.995
-        ).toFixed(2);
+        highs[i] - lows[i],
 
-      const take =
-        (
-          price * 1.03
-        ).toFixed(2);
+        Math.abs(
+          highs[i] - closes[i - 1]
+        ),
 
-      const stop =
-        (
-          price * 0.98
-        ).toFixed(2);
+        Math.abs(
+          lows[i] - closes[i - 1]
+        )
+      );
 
-      const direction =
-        price >
-        closes[0]
-          ? "ЛОНГ"
-          : "ШОРТ";
+      trs.push(tr);
+    }
 
-      await sendMessage(
+    const recent =
+      trs.slice(-period);
+
+    return (
+      recent.reduce(
+        (a, b) => a + b,
+        0
+      ) / recent.length
+    );
+  }
+
+  const ema20 =
+    EMA(closes, 20);
+
+  const ema50 =
+    EMA(closes, 50);
+
+  const rsi =
+    RSI(closes);
+
+  const atr =
+    ATR(
+      highs,
+      lows,
+      closes
+    );
+
+  // ================================================
+  // MARKET LOGIC
+  // ================================================
+
+  const bullish =
+    ema20 > ema50;
+
+  const direction =
+    bullish
+      ? "ЛОНГ"
+      : "ШОРТ";
+
+  const recommendation =
+    bullish
+      ? "🟢 ПОКУПАТЬ"
+      : "🔴 ПРОДАВАТЬ";
+
+  const support =
+    Math.min(
+      ...lows.slice(-20)
+    );
+
+  const resistance =
+    Math.max(
+      ...highs.slice(-20)
+    );
+
+  let entry;
+  let take;
+  let stop;
+
+  if (bullish) {
+
+    entry =
+      support + atr * 0.2;
+
+    take =
+      resistance;
+
+    stop =
+      support - atr * 0.4;
+
+  } else {
+
+    entry =
+      resistance - atr * 0.2;
+
+    take =
+      support;
+
+    stop =
+      resistance + atr * 0.4;
+  }
+
+  const rr = (
+
+    Math.abs(
+      take - entry
+    ) /
+
+    Math.abs(
+      entry - stop
+    )
+
+  ).toFixed(2);
+
+  const confidence =
+    Math.min(
+      97,
+
+      Math.floor(
+
+        55 +
+
+        Math.abs(
+          ema20 - ema50
+        ) / price * 2500
+      )
+    );
+
+  const volatility = (
+
+    atr / price * 100
+
+  ).toFixed(2);
+
+  // ================================================
+  // TIME WINDOWS
+  // ================================================
+
+  let entryTime = "";
+  let fixTime = "";
+
+  if (volatility < 1) {
+
+    entryTime =
+      "6-12 часов";
+
+    fixTime =
+      "12-48 часов";
+
+  }
+
+  else if (
+    volatility < 2
+  ) {
+
+    entryTime =
+      "2-6 часов";
+
+    fixTime =
+      "8-24 часа";
+
+  }
+
+  else {
+
+    entryTime =
+      "30-90 минут";
+
+    fixTime =
+      "2-8 часов";
+  }
+
+  // ================================================
+  // PROPHECIES
+  // ================================================
+
+  const openers = [
+
+    "🌌 Туманы рынка сгущаются вокруг древних потоков.",
+
+    "🌑 Лунные свечи открывают скрытые движения китов.",
+
+    "⚡ Эфир дрожит от приближения импульса.",
+
+    "🔮 Руны рынка предупреждают о сильном движении."
+  ];
+
+  const warnings = [
+
+    "⚠️ Ложный импульс может уничтожить слабые позиции.",
+
+    "⚠️ Крупный капитал скрытно меняет направление.",
+
+    "⚠️ Волатильность усиливается в тенях рынка.",
+
+    "⚠️ Тёмные киты готовят резкое движение."
+  ];
+
+  const endings = [
+
+    "💀 Только терпеливые увидят истинное направление.",
+
+    "🌒 Потоки эфира шепчут о скором изменении баланса.",
+
+    "🜂 Древние свечи готовят новую фазу рынка.",
+
+    "🧿 Интуиция сегодня важнее эмоций."
+  ];
+
+  function randomItem(arr) {
+
+    return arr[
+      Math.floor(
+        Math.random() * arr.length
+      )
+    ];
+  }
+
+  const prophecy = `
+
+${randomItem(openers)}
+
+${randomItem(warnings)}
+
+${randomItem(endings)}
+`;
+
+  // ================================================
+  // SEND
+  // ================================================
+
+  await sendMessage(
 
 `
 🌌 ${symbol.toUpperCase()} ORACLE
@@ -975,43 +1248,60 @@ $${price.toFixed(2)}
 📈 Направление:
 ${direction}
 
+📊 RSI:
+${rsi.toFixed(2)}
+
+📉 EMA20:
+${ema20.toFixed(2)}
+
+📉 EMA50:
+${ema50.toFixed(2)}
+
+🌊 Волатильность:
+${volatility}%
+
+━━━━━━━━━━
+
 🎯 Вход:
-$${entry}
+$${entry.toFixed(2)}
 
 💎 Фиксация:
-$${take}
+$${take.toFixed(2)}
 
 🛡 Стоп:
-$${stop}
+$${stop.toFixed(2)}
+
+⚖️ Risk/Reward:
+${rr}
 
 ━━━━━━━━━━
 
 ⏳ Вход:
-в ближайшие 1-4 часа
+${entryTime}
 
 ⌛ Фиксация:
-6-24 часа
+${fixTime}
 
 ━━━━━━━━━━
 
-🌫 Мистическое пророчество:
+🔥 Уверенность:
+${confidence}%
 
-Тени рынка усиливаются.
+🧭 Рекомендация:
+${recommendation}
 
-Крупный капитал
-движется сквозь туман свечей.
+━━━━━━━━━━
 
-⚠️ Будь осторожен
-во время ложных импульсов.
+${prophecy}
 `,
 
-        keyboard
-      );
+    keyboard
+  );
 
-      return res
-        .status(200)
-        .end();
-    }
+  return res
+    .status(200)
+    .end();
+}
 
     // ==================================================
     // FALLBACK
