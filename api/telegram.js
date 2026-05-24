@@ -28,7 +28,7 @@ const TELEGRAM_TOKEN =
 
 const GROQ_API_KEY =
   process.env.GROQ_API_KEY ||
-  "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";
+  "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";
 
 const GNEWS_API_KEY =
   process.env.GNEWS_API_KEY ||
