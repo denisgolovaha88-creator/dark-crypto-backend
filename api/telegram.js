@@ -1048,6 +1048,85 @@ if (
     .status(200)
     .end();
 }
+    // ==================================================
+// ORACLE ALERTS
+// ==================================================
+
+async function saveAlertSubscription(
+  userId
+) {
+
+  try {
+
+    await supabaseInsert(
+      "oracle_alerts",
+      {
+
+        telegram_id:
+          userId,
+
+        coin:
+          "SOL",
+
+        active:
+          true,
+
+        created_at:
+          new Date()
+            .toISOString()
+      }
+    );
+
+  } catch (e) {
+
+    console.log(
+      "ALERT SAVE ERROR",
+      e
+    );
+  }
+}
+
+// ==================================================
+// SIGNAL ALERT BUTTON
+// ==================================================
+
+if (
+  text.includes("сигнал")
+) {
+
+  await saveAlertSubscription(
+    userId
+  );
+
+  await sendMessage(
+
+`
+🌌 ORACLE ALERT АКТИВИРОВАН
+
+━━━━━━━━━━
+
+🔮 Потоки эфира
+начали наблюдение
+за SOLANA.
+
+Когда появится
+сильная точка входа —
+оракул призовёт тебя.
+
+━━━━━━━━━━
+
+⚠️ Ты получишь сигнал
+только когда рынок
+действительно будет готов.
+`,
+
+    keyboard
+  );
+
+  return res
+    .status(200)
+    .end();
+}
 
     // ==================================================
     // REFERRALS
