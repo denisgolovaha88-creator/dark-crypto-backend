@@ -1,7 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/bot?cron=sol-alert",
+      "path": "/api/telegram?cron=sol-alert",
       "schedule": "*/10 * * * *"
     }
   ]
