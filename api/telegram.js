@@ -813,16 +813,28 @@ if (
         ],
 
         [
-          {
-            text:
-              `📰 НОВОСТИ`
-          },
+  {
+    text:
+      `📰 НОВОСТИ`
+  },
 
-          {
-            text:
-              `🔮 РУНЫ`
-          }
-        ],
+  {
+    text:
+      `🔮 РУНЫ`
+  }
+],
+
+[
+  {
+    text:
+      `💠 ОБЕРЕГ`
+  },
+
+  {
+    text:
+      `🌑 СИГНАЛЫ`
+  }
+],
 
         [
           {
@@ -1263,6 +1275,177 @@ const rune =
         .status(200)
         .end();
     }
+    
+    // ==================================================
+// TALISMANS
+// ==================================================
+
+const talismans = [
+
+  {
+
+    name:
+      "OBSIDIAN SIGIL",
+
+    rarity:
+      "RARE",
+
+    stone:
+      "Чёрный обсидиан",
+
+    energy:
+      "Защита от хаоса",
+
+    symbol:
+      "🜂ᛉ⚡",
+
+    prophecy:
+`
+Тени рассеются
+перед твоим взглядом.
+`
+  },
+
+  {
+
+    name:
+      "LUNAR VEIL",
+
+    rarity:
+      "EPIC",
+
+    stone:
+      "Лунный камень",
+
+    energy:
+      "Скрытая интуиция",
+
+    symbol:
+      "☾ᚠ🌕",
+
+    prophecy:
+`
+Ложные движения
+не смогут сбить тебя.
+`
+  },
+
+  {
+
+    name:
+      "VOID SHARD",
+
+    rarity:
+      "LEGENDARY",
+
+    stone:
+      "Тёмный кварц",
+
+    energy:
+      "Сила глубин рынка",
+
+    symbol:
+      "◈ᚺ🜏",
+
+    prophecy:
+`
+Хаос откроет
+новые врата силы.
+`
+  }
+];
+
+// ==================================================
+// DAILY TALISMAN
+// ==================================================
+
+if (
+  text.includes("оберег")
+) {
+
+  const today =
+    new Date()
+      .toISOString()
+      .slice(0, 10);
+
+  if (
+    global.userTalismans?.[userId]?.date ===
+    today
+  ) {
+
+    await sendMessage(
+
+`
+💠 Сегодня оберег уже был открыт.
+
+Возвращайся после полуночи.
+`,
+
+      keyboard
+    );
+
+    return res
+      .status(200)
+      .end();
+  }
+
+  global.userTalismans =
+    global.userTalismans || {};
+
+  const talisman =
+    talismans[
+      Math.floor(
+        Math.random() *
+        talismans.length
+      )
+    ];
+
+  global.userTalismans[userId] = {
+
+    date:
+      today,
+
+    talisman
+  };
+
+  await sendMessage(
+
+`
+💠 ОБЕРЕГ АКТИВИРОВАН
+
+━━━━━━━━━━
+
+◈ ${talisman.name} ◈
+
+💎 Камень:
+${talisman.stone}
+
+⚡ Энергия:
+${talisman.energy}
+
+🌕 Редкость:
+${talisman.rarity}
+
+━━━━━━━━━━
+
+🔮 Пророчество:
+
+${talisman.prophecy}
+
+━━━━━━━━━━
+
+💠 Символ силы:
+
+${talisman.symbol}
+`,
+
+    keyboard
+  );
+
+  return res
+    .status(200)
+    .end();
+}
 
     // ==================================================
 // HOROSCOPE ENGINE
