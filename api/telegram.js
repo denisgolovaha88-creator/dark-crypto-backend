@@ -806,10 +806,6 @@ if (
               `🔵 XRP $${prices.ripple.usd}`
           },
 
-          {
-            text:
-              `🌑 СИГНАЛ`
-          }
         ],
 
         [
