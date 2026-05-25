@@ -2248,7 +2248,7 @@ ${prophecy}
   } catch (e) {
 
     console.log(
-      "LOBAL ERROR",
+      "GLOBAL ERROR",
       e
     );
 
