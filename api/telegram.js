@@ -447,7 +447,7 @@ if (
       return res
         .status(200)
         .send(
-          "🌌 CRYPTO NOSTRADAMUS ONLINE"
+          "🔥 NEW VERSION 777"
         );
     }
 
