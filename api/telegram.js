@@ -36,7 +36,7 @@ const GNEWS_API_KEY =
 
 const SUPABASE_URL =
   process.env.SUPABASE_URL ||
-  "https://zosntsrvmbvehfpbicgx.supabase.co/rest/v1/";
+  "https://zosntsrvmbvehfpbicgx.supabase.co";
 
 const SUPABASE_KEY =
   process.env.SUPABASE_KEY ||
@@ -856,7 +856,11 @@ if (
     ]
   ],
 
-  resize_keyboard: true
+  resize_keyboard: true,
+
+  one_time_keyboard: false,
+
+  selective: false
 };
 
     // ==================================================
