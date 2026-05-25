@@ -500,31 +500,34 @@ if (
 
       try {
 
-        await fetch(
-          `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`,
-          {
-            method: "POST",
+        const payload = {
 
-            headers: {
-              "Content-Type":
-                "application/json"
-            },
+  chat_id: chatId,
 
-            body: JSON.stringify({
+  text,
 
-              chat_id: chatId,
+  parse_mode: "HTML"
+};
 
-              text,
+if (keyboard) {
 
-              parse_mode: "HTML",
+  payload.reply_markup =
+    keyboard;
+}
 
-              reply_markup:
-  keyboard
-    ? JSON.stringify(keyboard)
-    : undefined
-            })
-          }
-        );
+await fetch(
+  `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`,
+  {
+    method: "POST",
+
+    headers: {
+      "Content-Type":
+        "application/json"
+    },
+
+    body: JSON.stringify(payload)
+  }
+);
 
       } catch (e) {
 
