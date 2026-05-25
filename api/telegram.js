@@ -517,7 +517,9 @@ if (
               parse_mode: "HTML",
 
               reply_markup:
-                keyboard
+  keyboard
+    ? JSON.stringify(keyboard)
+    : undefined
             })
           }
         );
