@@ -1468,6 +1468,7 @@ if (
 
   const talisman =
     `${stone}${rune}`;
+
   const svg = `
 
 <svg
@@ -1538,69 +1539,30 @@ ${rune}
       talisman
     );
 
-  const svg = `
+  await sendDocument(
 
-<svg
-  width="512"
-  height="512"
-  xmlns="http://www.w3.org/2000/svg"
->
+    "obereg.svg",
 
-<defs>
+    svg,
 
-<filter id="glow">
+`
+💠 ОБЕРЕГ СОЗДАН
 
-<feGaussianBlur
-  stdDeviation="8"
-  result="blur"
-/>
+━━━━━━━━━━
 
-<feMerge>
+${talisman}
 
-<feMergeNode in="blur"/>
+━━━━━━━━━━
 
-<feMergeNode in="SourceGraphic"/>
-
-</feMerge>
-
-</filter>
-
-</defs>
-
-<rect
-  width="100%"
-  height="100%"
-  fill="#050505"
-/>
-
-<circle
-  cx="256"
-  cy="256"
-  r="180"
-  fill="#111111"
-  stroke="#00e5ff"
-  stroke-width="10"
-/>
-
-<text
-  x="50%"
-  y="58%"
-  text-anchor="middle"
-  font-size="180"
-  fill="#00e5ff"
-  font-family="serif"
-  filter="url(#glow)"
->
-${rune}
-</text>
-
-</svg>
-`;
+🔮 Артефакт активирован.
+`
+  );
 
   return res
     .status(200)
     .end();
 }
+    
     // ==================================================
 // MY TALISMANS
 // ==================================================
