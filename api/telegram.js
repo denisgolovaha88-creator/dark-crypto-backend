@@ -590,6 +590,50 @@ if (
       }
     }
 
+        // ==================================================
+    // SEND PHOTO
+    // ==================================================
+
+    async function sendPhoto(
+      imageUrl,
+      caption = ""
+    ) {
+
+      try {
+
+        await fetch(
+
+          `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`,
+
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+
+            body: JSON.stringify({
+
+              chat_id: chatId,
+
+              photo: imageUrl,
+
+              caption
+
+            })
+          }
+        );
+
+      } catch (e) {
+
+        console.log(
+          "PHOTO ERROR",
+          e
+        );
+      }
+    }
+
     // ==================================================
     // SAFE FETCH
     // ==================================================
