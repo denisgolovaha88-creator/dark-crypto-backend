@@ -1373,8 +1373,7 @@ const talismans = [
 
 if (
   text.includes("💠")
-)
-{
+) {
 
   const runes = [
     "ᛉ",
@@ -1386,24 +1385,10 @@ if (
   ];
 
   const stones = [
-
-    {
-      name: "OBSIDIAN",
-      color: "#111111",
-      glow: "#00e5ff"
-    },
-
-    {
-      name: "EMBER",
-      color: "#2b0f0f",
-      glow: "#ff3b3b"
-    },
-
-    {
-      name: "VOID",
-      color: "#1a1a2e",
-      glow: "#9b5cff"
-    }
+    "🪨",
+    "🗿",
+    "📜",
+    "♨"
   ];
 
   const rune =
@@ -1422,68 +1407,8 @@ if (
       )
     ];
 
-  const svg = `
-
-<svg
-  width="512"
-  height="512"
-  xmlns="http://www.w3.org/2000/svg"
->
-
-<defs>
-
-<filter id="glow">
-
-<feGaussianBlur
-  stdDeviation="8"
-  result="coloredBlur"
-/>
-
-<feMerge>
-
-<feMergeNode
-  in="coloredBlur"
-/>
-
-<feMergeNode
-  in="SourceGraphic"
-/>
-
-</feMerge>
-
-</filter>
-
-</defs>
-
-<rect
-  width="100%"
-  height="100%"
-  fill="#050505"
-/>
-
-<circle
-  cx="256"
-  cy="256"
-  r="180"
-  fill="${stone.color}"
-  stroke="${stone.glow}"
-  stroke-width="10"
-/>
-
-<text
-  x="50%"
-  y="57%"
-  text-anchor="middle"
-  font-size="180"
-  fill="${stone.glow}"
-  font-family="serif"
-  filter="url(#glow)"
->
-${rune}
-</text>
-
-</svg>
-`;
+  const talisman =
+    `${stone}${rune}`;
 
   global.userTalismans =
     global.userTalismans || {};
@@ -1493,7 +1418,7 @@ ${rune}
 
   global.userTalismans[userId]
     .push(
-      `${stone.name} ${rune}`
+      talisman
     );
 
   await sendMessage(
@@ -1503,25 +1428,12 @@ ${rune}
 
 ━━━━━━━━━━
 
-🪨 Камень:
-${stone.name}
-
-🔮 Руна:
-${rune}
-
-⚡ Энергия активирована
+${talisman}
 
 ━━━━━━━━━━
 
-📜 SVG АРТЕФАКТ:
-
-${svg}
-
-━━━━━━━━━━
-
-⚠️ Следующий этап:
-бот начнёт отправлять
-настоящие PNG-обереги.
+🔮 Артефакт связан
+с потоками эфира.
 `,
 
     keyboard
