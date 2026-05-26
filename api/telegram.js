@@ -1681,13 +1681,7 @@ formData.append(
   "obereg.png"
 );
   
-  await sendDocument(
-
-  "obereg.svg",
-
-  svg,
-
-`await fetch(
+  await fetch(
 
   `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`,
 
