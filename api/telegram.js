@@ -1376,12 +1376,28 @@ if (
 ) {
 
   const talisman =
+    global.userTalismans =
+  global.userTalismans || {};
+
+global.userTalismans[userId] =
+  global.userTalismans[userId] || [];
     talismans[
       Math.floor(
         Math.random() *
         talismans.length
       )
     ];
+
+  global.userTalismans =
+  global.userTalismans || {};
+
+global.userTalismans[userId] =
+  global.userTalismans[userId] || [];
+
+global.userTalismans[userId]
+  .push(
+    talisman.symbol
+  );
 
   await sendMessage(
 
@@ -1412,6 +1428,50 @@ ${talisman.prophecy}
 ⚡ Этот оберег можно
 использовать в нике
 или статусе Telegram.
+`,
+
+    keyboard
+  );
+
+  return res
+    .status(200)
+    .end();
+}
+    // ==================================================
+// MY TALISMANS
+// ==================================================
+
+if (
+  text.includes("мои обереги")
+) {
+
+  const list =
+    global.userTalismans?.[userId] || [];
+
+  if (!list.length) {
+
+    await sendMessage(
+
+`
+📜 У тебя пока нет оберегов.
+`,
+
+      keyboard
+    );
+
+    return res
+      .status(200)
+      .end();
+  }
+
+  await sendMessage(
+
+`
+📜 ТВОИ ОБЕРЕГИ
+
+━━━━━━━━━━
+
+${list.join("\n")}
 `,
 
     keyboard
