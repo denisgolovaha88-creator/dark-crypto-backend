@@ -1528,6 +1528,100 @@ if (
   const talisman =
     `${stone.name} ${rune}`;
 
+  const svg = `
+
+<svg
+  width="1024"
+  height="1024"
+  xmlns="http://www.w3.org/2000/svg"
+>
+
+<defs>
+
+<radialGradient id="bg">
+
+<stop
+  offset="0%"
+  stop-color="#101820"
+/>
+
+<stop
+  offset="100%"
+  stop-color="#000000"
+/>
+
+</radialGradient>
+
+<filter id="glow">
+
+<feGaussianBlur
+  stdDeviation="12"
+  result="blur"
+/>
+
+<feMerge>
+
+<feMergeNode in="blur"/>
+
+<feMergeNode in="SourceGraphic"/>
+
+</feMerge>
+
+</filter>
+
+</defs>
+
+<rect
+  width="100%"
+  height="100%"
+  fill="url(#bg)"
+/>
+
+<circle
+  cx="512"
+  cy="512"
+  r="320"
+  fill="#050505"
+  stroke="#00e5ff"
+  stroke-width="12"
+/>
+
+<circle
+  cx="512"
+  cy="512"
+  r="250"
+  fill="none"
+  stroke="#9b5cff"
+  stroke-width="4"
+  opacity="0.5"
+/>
+
+<text
+  x="50%"
+  y="54%"
+  text-anchor="middle"
+  font-size="240"
+  fill="#00e5ff"
+  font-family="serif"
+  filter="url(#glow)"
+>
+${rune}
+</text>
+
+<text
+  x="50%"
+  y="78%"
+  text-anchor="middle"
+  font-size="44"
+  fill="#888888"
+  font-family="monospace"
+>
+${stone.name}
+</text>
+
+</svg>
+`;
+
   global.userTalismans =
     global.userTalismans || {};
 
