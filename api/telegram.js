@@ -531,6 +531,65 @@ if (
       }
     }
 
+        // ==================================================
+    // SEND DOCUMENT
+    // ==================================================
+
+    async function sendDocument(
+      fileName,
+      content,
+      caption = ""
+    ) {
+
+      try {
+
+        const formData =
+          new FormData();
+
+        const blob =
+          new Blob(
+            [content],
+            {
+              type:
+                "image/svg+xml"
+            }
+          );
+
+        formData.append(
+          "chat_id",
+          chatId
+        );
+
+        formData.append(
+          "caption",
+          caption
+        );
+
+        formData.append(
+          "document",
+          blob,
+          fileName
+        );
+
+        await fetch(
+
+          `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendDocument`,
+
+          {
+            method: "POST",
+            body: formData
+          }
+        );
+
+      } catch (e) {
+
+        console.log(
+          "DOCUMENT ERROR",
+          e
+        );
+      }
+    }
+
     // ==================================================
     // SAFE FETCH
     // ==================================================
