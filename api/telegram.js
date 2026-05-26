@@ -1671,13 +1671,7 @@ formData.append(
 
   "photo",
 
-  new Blob(
-    [pngBuffer],
-    {
-      type: "image/png"
-    }
-  ),
-
+  pngBuffer,
   "obereg.png"
 );
   
