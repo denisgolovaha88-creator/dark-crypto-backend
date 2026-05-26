@@ -1633,9 +1633,11 @@ ${stone.name}
       talisman
     );
 
-  await sendPhoto(
+  await sendDocument(
 
-    stone.image,
+  "obereg.svg",
+
+  svg,
 
 `
 💠 ОБЕРЕГ СОЗДАН
@@ -1646,10 +1648,9 @@ ${talisman}
 
 ━━━━━━━━━━
 
-🔮 Артефакт связан
-с потоками эфира.
+🔮 Артефакт пробуждён.
 `
-  );
+);
 
   return res
     .status(200)
