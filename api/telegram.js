@@ -1474,11 +1474,15 @@ const talismans = [
 // TALISMAN ROUTER
 // ==================================================
 
+// ==================================================
+// OBERIG ENGINE
+// ==================================================
+
 if (
   text.includes("оберег")
   &&
   !text.includes("мои")
-)
+) {
 
   const runes = [
     "ᛉ",
@@ -1490,26 +1494,10 @@ if (
   ];
 
   const stones = [
-
-  {
-    name: "OBSIDIAN",
-    image:
-"https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f"
-  },
-
-  {
-    name: "EMBER",
-    image:
-"https://images.unsplash.com/photo-1506744038136-46273834b3fb"
-  },
-
-  {
-    name: "VOID",
-    image:
-"https://images.unsplash.com/photo-1493246507139-91e8fad9978e"
-  }
-
-];
+    "OBSIDIAN",
+    "EMBER",
+    "VOID"
+  ];
 
   const rune =
     runes[
@@ -1528,101 +1516,7 @@ if (
     ];
 
   const talisman =
-    `${stone.name} ${rune}`;
-
-  const svg = `
-
-<svg
-  width="1024"
-  height="1024"
-  xmlns="http://www.w3.org/2000/svg"
->
-
-<defs>
-
-<radialGradient id="bg">
-
-<stop
-  offset="0%"
-  stop-color="#101820"
-/>
-
-<stop
-  offset="100%"
-  stop-color="#000000"
-/>
-
-</radialGradient>
-
-<filter id="glow">
-
-<feGaussianBlur
-  stdDeviation="12"
-  result="blur"
-/>
-
-<feMerge>
-
-<feMergeNode in="blur"/>
-
-<feMergeNode in="SourceGraphic"/>
-
-</feMerge>
-
-</filter>
-
-</defs>
-
-<rect
-  width="100%"
-  height="100%"
-  fill="url(#bg)"
-/>
-
-<circle
-  cx="512"
-  cy="512"
-  r="320"
-  fill="#050505"
-  stroke="#00e5ff"
-  stroke-width="12"
-/>
-
-<circle
-  cx="512"
-  cy="512"
-  r="250"
-  fill="none"
-  stroke="#9b5cff"
-  stroke-width="4"
-  opacity="0.5"
-/>
-
-<text
-  x="50%"
-  y="54%"
-  text-anchor="middle"
-  font-size="240"
-  fill="#00e5ff"
-  font-family="serif"
-  filter="url(#glow)"
->
-${rune}
-</text>
-
-<text
-  x="50%"
-  y="78%"
-  text-anchor="middle"
-  font-size="44"
-  fill="#888888"
-  font-family="monospace"
->
-${stone.name}
-</text>
-
-</svg>
-`;
+    `${stone} ${rune}`;
 
   global.userTalismans =
     global.userTalismans || {};
@@ -1634,33 +1528,31 @@ ${stone.name}
     .push(
       talisman
     );
-  const sharp =
-  require("sharp");
 
-await sendMessage(
+  await sendMessage(
 
-PNG ENGINE OK
+`
+💠 ОБЕРЕГ СОЗДАН
+
+━━━━━━━━━━
 
 ${talisman}
+
+━━━━━━━━━━
+
+🔮 Артефакт пробуждён.
 `,
-keyboard
-);
 
-  `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`,
-
-  {
-    method: "POST",
-    body: formData
-  }
-);
+    keyboard
+  );
 
   return res
     .status(200)
     .end();
 }
-    
-    // ==================================================
-// MY TALISMANS
+
+// ==================================================
+// MY OBERIGS
 // ==================================================
 
 if (
