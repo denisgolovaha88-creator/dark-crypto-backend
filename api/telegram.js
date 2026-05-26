@@ -1488,24 +1488,26 @@ if (
   ];
 
   const stones = [
-    {
-      name: "OBSIDIAN",
-      image:
-"https://upload.wikimedia.org/wikipedia/commons/0/0f/ObsidianUSGOV.jpg"
-    },
 
-    {
-      name: "EMBER",
-      image:
-"https://upload.wikimedia.org/wikipedia/commons/7/70/Fire_icon.svg"
-    },
+  {
+    name: "OBSIDIAN",
+    image:
+"https://picsum.photos/512?random=1"
+  },
 
-    {
-      name: "VOID",
-      image:
-"https://upload.wikimedia.org/wikipedia/commons/3/3b/Black_square.jpg"
-    }
-  ];
+  {
+    name: "EMBER",
+    image:
+"https://picsum.photos/512?random=2"
+  },
+
+  {
+    name: "VOID",
+    image:
+"https://picsum.photos/512?random=3"
+  }
+
+];
 
   const rune =
     runes[
