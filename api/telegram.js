@@ -1492,19 +1492,19 @@ if (
   {
     name: "OBSIDIAN",
     image:
-"https://picsum.photos/512?random=1"
+"https://images.unsplash.com/photo-1518173946687-a4c8892bbd9f"
   },
 
   {
     name: "EMBER",
     image:
-"https://picsum.photos/512?random=2"
+"https://images.unsplash.com/photo-1506744038136-46273834b3fb"
   },
 
   {
     name: "VOID",
     image:
-"https://picsum.photos/512?random=3"
+"https://images.unsplash.com/photo-1493246507139-91e8fad9978e"
   }
 
 ];
