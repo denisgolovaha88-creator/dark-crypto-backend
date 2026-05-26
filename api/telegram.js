@@ -1376,11 +1376,6 @@ if (
 ) {
 
   const talisman =
-    global.userTalismans =
-  global.userTalismans || {};
-
-global.userTalismans[userId] =
-  global.userTalismans[userId] || [];
     talismans[
       Math.floor(
         Math.random() *
@@ -1389,15 +1384,15 @@ global.userTalismans[userId] =
     ];
 
   global.userTalismans =
-  global.userTalismans || {};
+    global.userTalismans || {};
 
-global.userTalismans[userId] =
-  global.userTalismans[userId] || [];
+  global.userTalismans[userId] =
+    global.userTalismans[userId] || [];
 
-global.userTalismans[userId]
-  .push(
-    talisman.symbol
-  );
+  global.userTalismans[userId]
+    .push(
+      talisman.symbol
+    );
 
   await sendMessage(
 
