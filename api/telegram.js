@@ -48,7 +48,7 @@ const SUPABASE_KEY =
 
 const fetch = global.fetch;
 
-import sharp from "sharp";
+const sharp = require("sharp");
 
 // ======================================================
 // GLOBAL CACHE
