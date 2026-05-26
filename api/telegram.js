@@ -1635,47 +1635,14 @@ ${stone.name}
   const sharp =
   require("sharp");
 
-const pngBuffer =
-  await sharp(
-    Buffer.from(svg)
-  )
-  .png()
-  .toBuffer();
+await sendMessage(
 
-const formData =
-  new FormData();
-
-formData.append(
-  "chat_id",
-  chatId
-);
-
-formData.append(
-
-  "caption",
-
-`
-💠 ОБЕРЕГ СОЗДАН
-
-━━━━━━━━━━
+PNG ENGINE OK
 
 ${talisman}
-
-━━━━━━━━━━
-
-🔮 Артефакт пробуждён.
-`
+`,
+keyboard
 );
-
-formData.append(
-
-  "photo",
-
-  pngBuffer,
-  "obereg.png"
-);
-  
-  await fetch(
 
   `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`,
 
