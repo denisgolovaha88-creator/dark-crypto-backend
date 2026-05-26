@@ -771,93 +771,96 @@ if (
     // ==================================================
     // KEYBOARD
     // ==================================================
+      // ==================================================
+// KEYBOARD
+// ==================================================
 
-    const keyboard = {
+const keyboard = {
 
-      keyboard: [
+  keyboard: [
 
-        [
-          {
-            text:
-              `₿ BTC $${prices.bitcoin.usd}`
-          },
+    [
+      {
+        text:
+          `₿ BTC $${prices.bitcoin.usd}`
+      },
 
-          {
-            text:
-              `⚡ ETH $${prices.ethereum.usd}`
-          }
-        ],
+      {
+        text:
+          `⚡ ETH $${prices.ethereum.usd}`
+      }
+    ],
 
-        [
-          {
-            text:
-              `🟡 BNB $${prices.binancecoin.usd}`
-          },
+    [
+      {
+        text:
+          `🟡 BNB $${prices.binancecoin.usd}`
+      },
 
-          {
-            text:
-              `🟣 SOL $${prices.solana.usd}`
-          }
-        ],
+      {
+        text:
+          `🟣 SOL $${prices.solana.usd}`
+      }
+    ],
 
-        [
-          {
-            text:
-              `🔵 XRP $${prices.ripple.usd}`
-          },
+    [
+      {
+        text:
+          `🔵 XRP $${prices.ripple.usd}`
+      },
 
-          {
-            text:
-              `🌑 СИГНАЛ`
-          }
-        ],
+      {
+        text:
+          `🌑 СИГНАЛ`
+      }
+    ],
 
-        [
-  {
-    text:
-      `📰 НОВОСТИ`
-  },
+    [
+      {
+        text:
+          `📰 НОВОСТИ`
+      },
 
-  {
-    text:
-      `🔮 РУНЫ`
-  }
-],
+      {
+        text:
+          `🔮 РУНЫ`
+      }
+    ],
 
-[
-  {
-    text:
-      `💠 ОБЕРЕГ`
-  }
-],
+    [
+      {
+        text:
+          `💠 ОБЕРЕГ`
+      }
+    ],
 
-        [
-          {
-            text:
-              `♈ ГОРОСКОП`
-          },
+    [
+      {
+        text:
+          `♈ ГОРОСКОП`
+      },
 
-          {
-            text:
-              `👥 РЕФЕРАЛЫ`
-          }
-        ],
+      {
+        text:
+          `👥 РЕФЕРАЛЫ`
+      }
+    ],
 
-        [
-          {
-            text:
-              `🏆 РЕЙТИНГ`
-          },
+    [
+      {
+        text:
+          `🏆 РЕЙТИНГ`
+      },
 
-          {
-            text:
-              `👑 VIP`
-          }
-        ]
-      ],
+      {
+        text:
+          `👑 VIP`
+      }
+    ]
+  ],
 
-      resize_keyboard: true
-    };
+  resize_keyboard: true
+};
 
     // ==================================================
     // ZODIAC
