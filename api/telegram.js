@@ -1632,12 +1632,27 @@ ${stone.name}
     .push(
       talisman
     );
+  const sharp =
+  require("sharp");
 
-  await sendDocument(
+const pngBuffer =
+  await sharp(
+    Buffer.from(svg)
+  )
+  .png()
+  .toBuffer();
 
-  "obereg.svg",
+const formData =
+  new FormData();
 
-  svg,
+formData.append(
+  "chat_id",
+  chatId
+);
+
+formData.append(
+
+  "caption",
 
 `
 💠 ОБЕРЕГ СОЗДАН
@@ -1650,6 +1665,36 @@ ${talisman}
 
 🔮 Артефакт пробуждён.
 `
+);
+
+formData.append(
+
+  "photo",
+
+  new Blob(
+    [pngBuffer],
+    {
+      type: "image/png"
+    }
+  ),
+
+  "obereg.png"
+);
+  
+  await sendDocument(
+
+  "obereg.svg",
+
+  svg,
+
+`await fetch(
+
+  `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`,
+
+  {
+    method: "POST",
+    body: formData
+  }
 );
 
   return res
