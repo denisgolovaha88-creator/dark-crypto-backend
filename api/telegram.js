@@ -1488,10 +1488,23 @@ if (
   ];
 
   const stones = [
-    "🪨",
-    "🗿",
-    "📜",
-    "♨"
+    {
+      name: "OBSIDIAN",
+      image:
+"https://upload.wikimedia.org/wikipedia/commons/0/0f/ObsidianUSGOV.jpg"
+    },
+
+    {
+      name: "EMBER",
+      image:
+"https://upload.wikimedia.org/wikipedia/commons/7/70/Fire_icon.svg"
+    },
+
+    {
+      name: "VOID",
+      image:
+"https://upload.wikimedia.org/wikipedia/commons/3/3b/Black_square.jpg"
+    }
   ];
 
   const rune =
@@ -1511,66 +1524,7 @@ if (
     ];
 
   const talisman =
-    `${stone}${rune}`;
-
-  const svg = `
-
-<svg
-  width="512"
-  height="512"
-  xmlns="http://www.w3.org/2000/svg"
->
-
-<defs>
-
-<filter id="glow">
-
-<feGaussianBlur
-  stdDeviation="8"
-  result="blur"
-/>
-
-<feMerge>
-
-<feMergeNode in="blur"/>
-
-<feMergeNode in="SourceGraphic"/>
-
-</feMerge>
-
-</filter>
-
-</defs>
-
-<rect
-  width="100%"
-  height="100%"
-  fill="#050505"
-/>
-
-<circle
-  cx="256"
-  cy="256"
-  r="180"
-  fill="#111111"
-  stroke="#00e5ff"
-  stroke-width="10"
-/>
-
-<text
-  x="50%"
-  y="58%"
-  text-anchor="middle"
-  font-size="180"
-  fill="#00e5ff"
-  font-family="serif"
-  filter="url(#glow)"
->
-${rune}
-</text>
-
-</svg>
-`;
+    `${stone.name} ${rune}`;
 
   global.userTalismans =
     global.userTalismans || {};
@@ -1583,11 +1537,9 @@ ${rune}
       talisman
     );
 
-  await sendDocument(
+  await sendPhoto(
 
-    "obereg.svg",
-
-    svg,
+    stone.image,
 
 `
 💠 ОБЕРЕГ СОЗДАН
@@ -1598,7 +1550,8 @@ ${talisman}
 
 ━━━━━━━━━━
 
-🔮 Артефакт активирован.
+🔮 Артефакт связан
+с потоками эфира.
 `
   );
 
