@@ -1375,54 +1375,139 @@ if (
   text.includes("оберег")
 ) {
 
-  const talisman =
-    talismans[
+  const runes = [
+    "ᛉ",
+    "ᚦ",
+    "ᛟ",
+    "ᛞ",
+    "ᚱ",
+    "⟁"
+  ];
+
+  const stones = [
+    {
+      name: "OBSIDIAN",
+      color: "#111111",
+      glow: "#00e5ff"
+    },
+
+    {
+      name: "EMBER",
+      color: "#2b0f0f",
+      glow: "#ff3b3b"
+    },
+
+    {
+      name: "VOID",
+      color: "#1a1a2e",
+      glow: "#9b5cff"
+    }
+  ];
+
+  const rune =
+    runes[
       Math.floor(
         Math.random() *
-        talismans.length
+        runes.length
       )
     ];
 
-  global.userTalismans =
-    global.userTalismans || {};
+  const stone =
+    stones[
+      Math.floor(
+        Math.random() *
+        stones.length
+      )
+    ];
 
-  global.userTalismans[userId] =
-    global.userTalismans[userId] || [];
+  const svg = `
 
-  global.userTalismans[userId]
-    .push(
-      talisman.symbol
-    );
+<svg
+  width="512"
+  height="512"
+  xmlns="http://www.w3.org/2000/svg"
+>
+
+<defs>
+
+<filter id="glow">
+
+<feGaussianBlur
+  stdDeviation="8"
+  result="coloredBlur"
+/>
+
+<feMerge>
+
+<feMergeNode
+  in="coloredBlur"
+/>
+
+<feMergeNode
+  in="SourceGraphic"
+/>
+
+</feMerge>
+
+</filter>
+
+</defs>
+
+<rect
+  width="100%"
+  height="100%"
+  fill="#050505"
+/>
+
+<circle
+  cx="256"
+  cy="256"
+  r="180"
+  fill="${stone.color}"
+  stroke="${stone.glow}"
+  stroke-width="10"
+/>
+
+<text
+  x="50%"
+  y="57%"
+  text-anchor="middle"
+  font-size="180"
+  fill="${stone.glow}"
+  font-family="serif"
+  filter="url(#glow)"
+>
+${rune}
+</text>
+
+</svg>
+`;
 
   await sendMessage(
 
 `
-💠 ОБЕРЕГ АКТИВИРОВАН
+💠 ОБЕРЕГ СОЗДАН
 
 ━━━━━━━━━━
 
-${talisman.symbol}
+🪨 Камень:
+${stone.name}
 
-Редкость:
-${talisman.rarity}
+🔮 Руна:
+${rune}
 
-Тип:
-${talisman.type}
-
-Энергия:
-${talisman.energy}
+⚡ Энергия активирована.
 
 ━━━━━━━━━━
 
-🔮 Пророчество:
+Скопируй SVG ниже
+и сохрани как:
 
-${talisman.prophecy}
+obereg.svg
 
 ━━━━━━━━━━
 
-⚡ Этот оберег можно
-использовать в нике
-или статусе Telegram.
+${svg}
 `,
 
     keyboard
