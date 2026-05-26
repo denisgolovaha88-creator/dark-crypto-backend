@@ -1375,7 +1375,7 @@ if (
   text.includes("оберег")
   &&
   !text.includes("мои")
-)
+) {
 
   const runes = [
     "ᛉ",
@@ -1387,6 +1387,7 @@ if (
   ];
 
   const stones = [
+
     {
       name: "OBSIDIAN",
       color: "#111111",
@@ -1485,6 +1486,17 @@ ${rune}
 </svg>
 `;
 
+  global.userTalismans =
+    global.userTalismans || {};
+
+  global.userTalismans[userId] =
+    global.userTalismans[userId] || [];
+
+  global.userTalismans[userId]
+    .push(
+      `${stone.name} ${rune}`
+    );
+
   await sendMessage(
 
 `
@@ -1498,18 +1510,19 @@ ${stone.name}
 🔮 Руна:
 ${rune}
 
-⚡ Энергия активирована.
+⚡ Энергия активирована
 
 ━━━━━━━━━━
 
-Скопируй SVG ниже
-и сохрани как:
-
-obereg.svg
-
-━━━━━━━━━━
+📜 SVG АРТЕФАКТ:
 
 ${svg}
+
+━━━━━━━━━━
+
+⚠️ Следующий этап:
+бот начнёт отправлять
+настоящие PNG-обереги.
 `,
 
     keyboard
