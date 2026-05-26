@@ -1468,6 +1468,64 @@ if (
 
   const talisman =
     `${stone}${rune}`;
+  const svg = `
+
+<svg
+  width="512"
+  height="512"
+  xmlns="http://www.w3.org/2000/svg"
+>
+
+<defs>
+
+<filter id="glow">
+
+<feGaussianBlur
+  stdDeviation="8"
+  result="blur"
+/>
+
+<feMerge>
+
+<feMergeNode in="blur"/>
+
+<feMergeNode in="SourceGraphic"/>
+
+</feMerge>
+
+</filter>
+
+</defs>
+
+<rect
+  width="100%"
+  height="100%"
+  fill="#050505"
+/>
+
+<circle
+  cx="256"
+  cy="256"
+  r="180"
+  fill="#111111"
+  stroke="#00e5ff"
+  stroke-width="10"
+/>
+
+<text
+  x="50%"
+  y="58%"
+  text-anchor="middle"
+  font-size="180"
+  fill="#00e5ff"
+  font-family="serif"
+  filter="url(#glow)"
+>
+${rune}
+</text>
+
+</svg>
+`;
 
   global.userTalismans =
     global.userTalismans || {};
@@ -1480,23 +1538,64 @@ if (
       talisman
     );
 
-  await sendMessage(
+  const svg = `
 
-`
-💠 ОБЕРЕГ СОЗДАН
+<svg
+  width="512"
+  height="512"
+  xmlns="http://www.w3.org/2000/svg"
+>
 
-━━━━━━━━━━
+<defs>
 
-${talisman}
+<filter id="glow">
 
-━━━━━━━━━━
+<feGaussianBlur
+  stdDeviation="8"
+  result="blur"
+/>
 
-🔮 Артефакт связан
-с потоками эфира.
-`,
+<feMerge>
 
-    keyboard
-  );
+<feMergeNode in="blur"/>
+
+<feMergeNode in="SourceGraphic"/>
+
+</feMerge>
+
+</filter>
+
+</defs>
+
+<rect
+  width="100%"
+  height="100%"
+  fill="#050505"
+/>
+
+<circle
+  cx="256"
+  cy="256"
+  r="180"
+  fill="#111111"
+  stroke="#00e5ff"
+  stroke-width="10"
+/>
+
+<text
+  x="50%"
+  y="58%"
+  text-anchor="middle"
+  font-size="180"
+  fill="#00e5ff"
+  font-family="serif"
+  filter="url(#glow)"
+>
+${rune}
+</text>
+
+</svg>
+`;
 
   return res
     .status(200)
