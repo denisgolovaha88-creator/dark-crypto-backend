@@ -1372,8 +1372,10 @@ const talismans = [
 // ==================================================
 
 if (
-  text === "💠 ОБЕРЕГ"
-) {
+  text.includes("оберег")
+  &&
+  !text.includes("мои")
+)
 
   const runes = [
     "ᛉ",
