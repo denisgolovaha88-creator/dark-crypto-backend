@@ -61,6 +61,45 @@ global.userCooldowns =
 global.userRunes =
   global.userRunes || {};
 
+const usersPath =
+
+  path.join(
+    process.cwd(),
+    "data",
+    "users.json"
+  );
+
+function loadUsers() {
+
+  try {
+
+    return JSON.parse(
+
+      fs.readFileSync(
+        usersPath,
+        "utf8"
+      )
+
+    );
+
+  } catch {
+
+    return {};
+  }
+}
+
+function saveUsers(data) {
+
+  fs.writeFileSync(
+    usersPath,
+    JSON.stringify(
+      data,
+      null,
+      2
+    )
+  );
+}
+
 // ==================================================
 // ORACLE ALERT ENGINE
 // ==================================================
@@ -1479,27 +1518,43 @@ if (
   !text.includes("мои")
 ) {
 
-  global.lastOberegTime =
-  global.lastOberegTime || {};
+  const users =
+  loadUsers();
+
+users[userId] =
+  users[userId] || {
+
+    oberegi: [],
+    lastObereg: 0
+  };
 
 const now =
   Date.now();
-
-const last =
-  global.lastOberegTime[userId] || 0;
 
 const cooldown =
   24 * 60 * 60 * 1000;
 
 if (
-  now - last < cooldown
+
+  now -
+  users[userId]
+    .lastObereg
+
+  < cooldown
+
 ) {
 
   const hours = Math.ceil(
 
     (
       cooldown -
-      (now - last)
+
+      (
+        now -
+        users[userId]
+          .lastObereg
+      )
+
     ) / 3600000
 
   );
@@ -1521,8 +1576,8 @@ ${hours} ч.
     .end();
 }
 
-global.lastOberegTime[userId] =
-  now;
+users[userId]
+  .lastObereg = now;
 
   const fs =
     require("fs");
@@ -1530,16 +1585,13 @@ global.lastOberegTime[userId] =
   const path =
     require("path");
 
-  global.userTalismans =
-  global.userTalismans || {};
-
-global.userTalismans[userId] =
-  global.userTalismans[userId] || [];
-
-global.userTalismans[userId]
+  users[userId]
+  .oberegi
   .push(
     obereg.name
   );
+
+saveUsers(users);
 
   const formData =
     new FormData();
@@ -1624,8 +1676,12 @@ if (
   text.includes("мои обереги")
 ) {
 
-  const list =
-    global.userTalismans?.[userId] || [];
+  const users =
+  loadUsers();
+
+const list =
+  users[userId]
+    ?.oberegi || [];
 
   if (!list.length) {
 
