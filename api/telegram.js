@@ -1530,6 +1530,17 @@ global.lastOberegTime[userId] =
   const path =
     require("path");
 
+  global.userTalismans =
+  global.userTalismans || {};
+
+global.userTalismans[userId] =
+  global.userTalismans[userId] || [];
+
+global.userTalismans[userId]
+  .push(
+    obereg.name
+  );
+
   const formData =
     new FormData();
 
