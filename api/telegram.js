@@ -46,6 +46,12 @@ const SUPABASE_KEY =
 // FETCH
 // ======================================================
 
+const fs =
+  require("fs");
+
+const path =
+  require("path");
+
 const fetch = global.fetch;
 
 // ======================================================
