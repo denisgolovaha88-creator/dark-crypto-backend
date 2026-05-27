@@ -1383,91 +1383,148 @@ const rune =
 // TALISMANS
 // ==================================================
 
-const talismans = [
+const oberegi = [
 
   {
+    file:
+      "obsidian-core.png",
 
-    symbol:
-      "🪨ᛉ",
+    name:
+      "OBSIDIAN CORE",
+
+    power:
+      "Защищает от хаоса рынка.",
 
     rarity:
-      "COMMON",
-
-    type:
-      "Каменная реза",
-
-    energy:
-      "Защита",
-
-    prophecy:
-`
-Тени отступят
-перед терпением.
-`
+      "Обычный"
   },
 
   {
+    file:
+      "void-seal.png",
 
-    symbol:
-      "📜ᚦ",
+    name:
+      "VOID SEAL",
+
+    power:
+      "Скрывает трейдера от волатильности.",
 
     rarity:
-      "RARE",
-
-    type:
-      "Свиток эфира",
-
-    energy:
-      "Интуиция",
-
-    prophecy:
-`
-Скрытый поток
-изменит направление.
-`
+      "Редкий"
   },
 
   {
+    file:
+      "shadow-ring.png",
 
-    symbol:
-      "🗿ᛞ",
+    name:
+      "SHADOW RING",
+
+    power:
+      "Усиливает ночные сигналы.",
 
     rarity:
-      "EPIC",
-
-    type:
-      "Монолит предков",
-
-    energy:
-      "Сила рынка",
-
-    prophecy:
-`
-Хаос откроет
-новые врата.
-`
+      "Редкий"
   },
 
   {
+    file:
+      "ether-medallion.png",
 
-    symbol:
-      "♨ᛟ",
+    name:
+      "ETHER MEDALLION",
+
+    power:
+      "Усиливает потоки эфира.",
 
     rarity:
-      "LEGENDARY",
+      "Обычный"
+  },
 
-    type:
-      "Огненная печать",
+  {
+    file:
+      "black-totem.png",
 
-    energy:
-      "Импульс",
+    name:
+      "BLACK TOTEM",
 
-    prophecy:
-`
-Пламя усилит
-движение китов.
-`
+    power:
+      "Поглощает негатив рынка.",
+
+    rarity:
+      "Эпический"
+  },
+
+  {
+    file:
+      "moon-relic.png",
+
+    name:
+      "MOON RELIC",
+
+    power:
+      "Усиливает лунные циклы рынка.",
+
+    rarity:
+      "Редкий"
+  },
+
+  {
+    file:
+      "crypt-sigil.png",
+
+    name:
+      "CRYPT SIGIL",
+
+    power:
+      "Открывает скрытые сигналы.",
+
+    rarity:
+      "Эпический"
+  },
+
+  {
+    file:
+      "noctis-eye.png",
+
+    name:
+      "NOCTIS EYE",
+
+    power:
+      "Позволяет видеть ложные импульсы.",
+
+    rarity:
+      "Легендарный"
+  },
+
+  {
+    file:
+      "chaos-ember.png",
+
+    name:
+      "CHAOS EMBER",
+
+    power:
+      "Усиливает агрессивные входы.",
+
+    rarity:
+      "Редкий"
+  },
+
+  {
+    file:
+      "dark-halo.png",
+
+    name:
+      "DARK HALO",
+
+    power:
+      "Создаёт защиту от ликвидаций.",
+
+    rarity:
+      "Мифический"
   }
+
 ];
 
 // ==================================================
