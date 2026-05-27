@@ -811,7 +811,7 @@ if (
 
         "news",
 
-        300000,
+        60000,
 
         async () => {
 
@@ -819,7 +819,7 @@ if (
 
             const r =
               await safeFetch(
-                `https://gnews.io/api/v4/search?q=crypto&lang=ru&max=5&apikey=${GNEWS_API_KEY}`
+                `https://gnews.io/api/v4/search?q=bitcoin OR ethereum OR solana&lang=ru&max=5&apikey=${GNEWS_API_KEY}`
               );
 
             const j =
