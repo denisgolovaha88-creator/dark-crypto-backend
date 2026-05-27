@@ -1485,9 +1485,6 @@ if (
   const path =
     require("path");
 
-  const talisman =
-    "OBSIDIAN CORE";
-
   const formData =
     new FormData();
 
@@ -1504,7 +1501,13 @@ if (
 
 ━━━━━━━━━━
 
-${talisman}
+${obereg.name}
+
+⚡ Сила:
+${obereg.power}
+
+🔮 Редкость:
+${obereg.rarity}
 
 ━━━━━━━━━━
 
@@ -1526,7 +1529,7 @@ ${talisman}
             process.cwd(),
             "data",
             "oberegi",
-            "obsidian-core.png"
+            obereg.file
           )
 
         )
