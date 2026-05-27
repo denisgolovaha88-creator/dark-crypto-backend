@@ -1479,6 +1479,51 @@ if (
   !text.includes("мои")
 ) {
 
+  global.lastOberegTime =
+  global.lastOberegTime || {};
+
+const now =
+  Date.now();
+
+const last =
+  global.lastOberegTime[userId] || 0;
+
+const cooldown =
+  24 * 60 * 60 * 1000;
+
+if (
+  now - last < cooldown
+) {
+
+  const hours = Math.ceil(
+
+    (
+      cooldown -
+      (now - last)
+    ) / 3600000
+
+  );
+
+  await sendMessage(
+
+`
+⏳ Следующий оберег
+будет доступен через:
+
+${hours} ч.
+`,
+
+    keyboard
+  );
+
+  return res
+    .status(200)
+    .end();
+}
+
+global.lastOberegTime[userId] =
+  now;
+
   const fs =
     require("fs");
 
