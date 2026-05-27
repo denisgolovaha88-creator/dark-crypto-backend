@@ -1671,17 +1671,17 @@ ${obereg.rarity}
 // ==================================================
 // MY OBERIGS
 // ==================================================
-
+    
 if (
   text.includes("мои обереги")
 ) {
 
   const users =
-  loadUsers();
+    loadUsers();
 
-const list =
-  users[userId]
-    ?.oberegi || [];
+  const list =
+    users[userId]
+      ?.oberegi || [];
 
   if (!list.length) {
 
