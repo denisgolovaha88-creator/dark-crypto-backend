@@ -1471,51 +1471,26 @@ const talismans = [
 ];
 
 // ==================================================
-// TALISMAN ROUTER
+// OBERIG ENGINE
 // ==================================================
 
-  const fs = require("fs");
-const path = require("path");
-
 if (
-  text.includes("оберег") &&
+  text.includes("оберег")
+  &&
   !text.includes("мои")
 ) {
 
-  const oberegi = [
+  const fs =
+    require("fs");
 
-    "obsidian-core.png",
-    "void-seal.png",
-    "shadow-ring.png",
-    "ether-medallion.png",
-    "black-totem.png",
-    "moon-relic.png",
-    "crypt-sigil.png",
-    "noctis-eye.png",
-    "chaos-ember.png",
-    "dark-halo.png"
+  const path =
+    require("path");
 
-  ];
+  const talisman =
+    "OBSIDIAN CORE";
 
-  const randomObereg =
-
-    oberegi[
-      Math.floor(
-        Math.random() *
-        oberegi.length
-      )
-    ];
-
-  const imagePath = path.join(
-
-    process.cwd(),
-    "data",
-    "oberegi",
-    randomObereg
-
-  );
-
-  const formData = new FormData();
+  const formData =
+    new FormData();
 
   formData.append(
     "chat_id",
@@ -1523,18 +1498,6 @@ if (
   );
 
   formData.append(
-
-    "photo",
-
-    new Blob([
-      fs.readFileSync(imagePath)
-    ]),
-
-    randomObereg
-  );
-
-  formData.append(
-
     "caption",
 
 `
@@ -1542,15 +1505,42 @@ if (
 
 ━━━━━━━━━━
 
-${randomObereg
-  .replace(".png", "")
-  .toUpperCase()}
+${talisman}
 
 ━━━━━━━━━━
 
 🔮 Артефакт пробуждён.
 `
+  );
 
+  formData.append(
+
+    "photo",
+
+    new Blob(
+
+      [
+
+        fs.readFileSync(
+
+          path.join(
+            process.cwd(),
+            "data",
+            "oberegi",
+            "obsidian-core.png"
+          )
+
+        )
+
+      ],
+
+      {
+        type: "image/png"
+      }
+
+    ),
+
+    "obsidian-core.png"
   );
 
   await fetch(
@@ -1561,7 +1551,6 @@ ${randomObereg
       method: "POST",
       body: formData
     }
-
   );
 
   return res
