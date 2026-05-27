@@ -1474,76 +1474,94 @@ const talismans = [
 // TALISMAN ROUTER
 // ==================================================
 
-// ==================================================
-// OBERIG ENGINE
-// ==================================================
+  const fs = require("fs");
+const path = require("path");
 
 if (
-  text.includes("оберег")
-  &&
+  text.includes("оберег") &&
   !text.includes("мои")
 ) {
 
-  const runes = [
-    "ᛉ",
-    "ᚦ",
-    "ᛟ",
-    "ᛞ",
-    "ᚱ",
-    "⟁"
+  const oberegi = [
+
+    "obsidian-core.png",
+    "void-seal.png",
+    "shadow-ring.png",
+    "ether-medallion.png",
+    "black-totem.png",
+    "moon-relic.png",
+    "crypt-sigil.png",
+    "noctis-eye.png",
+    "chaos-ember.png",
+    "dark-halo.png"
+
   ];
 
-  const stones = [
-    "OBSIDIAN",
-    "EMBER",
-    "VOID"
-  ];
+  const randomObereg =
 
-  const rune =
-    runes[
+    oberegi[
       Math.floor(
         Math.random() *
-        runes.length
+        oberegi.length
       )
     ];
 
-  const stone =
-    stones[
-      Math.floor(
-        Math.random() *
-        stones.length
-      )
-    ];
+  const imagePath = path.join(
 
-  const talisman =
-    `${stone} ${rune}`;
+    process.cwd(),
+    "data",
+    "oberegi",
+    randomObereg
 
-  global.userTalismans =
-    global.userTalismans || {};
+  );
 
-  global.userTalismans[userId] =
-    global.userTalismans[userId] || [];
+  const formData = new FormData();
 
-  global.userTalismans[userId]
-    .push(
-      talisman
-    );
+  formData.append(
+    "chat_id",
+    chatId
+  );
 
-  await sendMessage(
+  formData.append(
+
+    "photo",
+
+    new Blob([
+      fs.readFileSync(imagePath)
+    ]),
+
+    randomObereg
+  );
+
+  formData.append(
+
+    "caption",
 
 `
 💠 ОБЕРЕГ СОЗДАН
 
 ━━━━━━━━━━
 
-${talisman}
+${randomObereg
+  .replace(".png", "")
+  .toUpperCase()}
 
 ━━━━━━━━━━
 
 🔮 Артефакт пробуждён.
-`,
+`
 
-    keyboard
+  );
+
+  await fetch(
+
+    `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`,
+
+    {
+      method: "POST",
+      body: formData
+    }
+
   );
 
   return res
