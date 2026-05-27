@@ -67,45 +67,6 @@ global.userCooldowns =
 global.userRunes =
   global.userRunes || {};
 
-const usersPath =
-
-  path.join(
-    process.cwd(),
-    "data",
-    "users.json"
-  );
-
-function loadUsers() {
-
-  try {
-
-    return JSON.parse(
-
-      fs.readFileSync(
-        usersPath,
-        "utf8"
-      )
-
-    );
-
-  } catch {
-
-    return {};
-  }
-}
-
-function saveUsers(data) {
-
-  fs.writeFileSync(
-    usersPath,
-    JSON.stringify(
-      data,
-      null,
-      2
-    )
-  );
-}
-
 // ==================================================
 // ORACLE ALERT ENGINE
 // ==================================================
