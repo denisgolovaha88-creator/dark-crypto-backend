@@ -1485,48 +1485,32 @@ if (
   !text.includes("мои")
 ) {
 
-  const users =
-  loadUsers();
+  global.lastOberegTime =
+    global.lastOberegTime || {};
 
-users[userId] =
-  users[userId] || {
+  const now =
+    Date.now();
 
-    oberegi: [],
-    lastObereg: 0
-  };
+  const last =
+    global.lastOberegTime[userId] || 0;
 
-const now =
-  Date.now();
+  const cooldown =
+    24 * 60 * 60 * 1000;
 
-const cooldown =
-  24 * 60 * 60 * 1000;
+  if (
+    now - last < cooldown
+  ) {
 
-if (
-
-  now -
-  users[userId]
-    .lastObereg
-
-  < cooldown
-
-) {
-
-  const hours = Math.ceil(
-
-    (
-      cooldown -
+    const hours = Math.ceil(
 
       (
-        now -
-        users[userId]
-          .lastObereg
-      )
+        cooldown -
+        (now - last)
+      ) / 3600000
 
-    ) / 3600000
+    );
 
-  );
-
-  await sendMessage(
+    await sendMessage(
 
 `
 ⏳ Следующий оберег
@@ -1535,30 +1519,33 @@ if (
 ${hours} ч.
 `,
 
-    keyboard
-  );
+      keyboard
+    );
 
-  return res
-    .status(200)
-    .end();
-}
+    return res
+      .status(200)
+      .end();
+  }
 
-users[userId]
-  .lastObereg = now;
+  global.lastOberegTime[userId] =
+    now;
+
+  global.userTalismans =
+    global.userTalismans || {};
+
+  global.userTalismans[userId] =
+    global.userTalismans[userId] || [];
+
+  global.userTalismans[userId]
+    .push(
+      obereg.name
+    );
 
   const fs =
     require("fs");
 
   const path =
     require("path");
-
-  users[userId]
-  .oberegi
-  .push(
-    obereg.name
-  );
-
-saveUsers(users);
 
   const formData =
     new FormData();
@@ -1617,7 +1604,7 @@ ${obereg.rarity}
 
     ),
 
-    "obsidian-core.png"
+    obereg.file
   );
 
   await fetch(
