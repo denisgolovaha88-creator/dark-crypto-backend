@@ -1386,146 +1386,88 @@ const rune =
 const oberegi = [
 
   {
-    file:
-      "obsidian-core.png",
-
-    name:
-      "OBSIDIAN CORE",
-
-    power:
-      "Защищает от хаоса рынка.",
-
-    rarity:
-      "Обычный"
+    file: "obsidian-core.png",
+    name: "OBSIDIAN CORE",
+    power: "Защищает от хаоса рынка.",
+    rarity: "Обычный"
   },
 
   {
-    file:
-      "void-seal.png",
-
-    name:
-      "VOID SEAL",
-
-    power:
-      "Скрывает трейдера от волатильности.",
-
-    rarity:
-      "Редкий"
+    file: "void-seal.png",
+    name: "VOID SEAL",
+    power: "Скрывает трейдера от волатильности.",
+    rarity: "Редкий"
   },
 
   {
-    file:
-      "shadow-ring.png",
-
-    name:
-      "SHADOW RING",
-
-    power:
-      "Усиливает ночные сигналы.",
-
-    rarity:
-      "Редкий"
+    file: "shadow-ring.png",
+    name: "SHADOW RING",
+    power: "Усиливает ночные сигналы.",
+    rarity: "Редкий"
   },
 
   {
-    file:
-      "ether-medallion.png",
-
-    name:
-      "ETHER MEDALLION",
-
-    power:
-      "Усиливает потоки эфира.",
-
-    rarity:
-      "Обычный"
+    file: "ether-medallion.png",
+    name: "ETHER MEDALLION",
+    power: "Усиливает потоки эфира.",
+    rarity: "Обычный"
   },
 
   {
-    file:
-      "black-totem.png",
-
-    name:
-      "BLACK TOTEM",
-
-    power:
-      "Поглощает негатив рынка.",
-
-    rarity:
-      "Эпический"
+    file: "black-totem.png",
+    name: "BLACK TOTEM",
+    power: "Поглощает негатив рынка.",
+    rarity: "Эпический"
   },
 
   {
-    file:
-      "moon-relic.png",
-
-    name:
-      "MOON RELIC",
-
-    power:
-      "Усиливает лунные циклы рынка.",
-
-    rarity:
-      "Редкий"
+    file: "moon-relic.png",
+    name: "MOON RELIC",
+    power: "Усиливает лунные циклы рынка.",
+    rarity: "Редкий"
   },
 
   {
-    file:
-      "crypt-sigil.png",
-
-    name:
-      "CRYPT SIGIL",
-
-    power:
-      "Открывает скрытые сигналы.",
-
-    rarity:
-      "Эпический"
+    file: "crypt-sigil.png",
+    name: "CRYPT SIGIL",
+    power: "Открывает скрытые сигналы.",
+    rarity: "Эпический"
   },
 
   {
-    file:
-      "noctis-eye.png",
-
-    name:
-      "NOCTIS EYE",
-
-    power:
-      "Позволяет видеть ложные импульсы.",
-
-    rarity:
-      "Легендарный"
+    file: "noctis-eye.png",
+    name: "NOCTIS EYE",
+    power: "Позволяет видеть ложные импульсы.",
+    rarity: "Легендарный"
   },
 
   {
-    file:
-      "chaos-ember.png",
-
-    name:
-      "CHAOS EMBER",
-
-    power:
-      "Усиливает агрессивные входы.",
-
-    rarity:
-      "Редкий"
+    file: "chaos-ember.png",
+    name: "CHAOS EMBER",
+    power: "Усиливает агрессивные входы.",
+    rarity: "Редкий"
   },
 
   {
-    file:
-      "dark-halo.png",
-
-    name:
-      "DARK HALO",
-
-    power:
-      "Создаёт защиту от ликвидаций.",
-
-    rarity:
-      "Мифический"
+    file: "dark-halo.png",
+    name: "DARK HALO",
+    power: "Создаёт защиту от ликвидаций.",
+    rarity: "Мифический"
   }
 
 ];
+
+const obereg =
+
+  oberegi[
+    Math.floor(
+      Math.random() *
+      oberegi.length
+    )
+  ];
+
+const talisman =
+  obereg.name;
 
 // ==================================================
 // OBERIG ENGINE
