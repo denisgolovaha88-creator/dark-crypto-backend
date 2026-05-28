@@ -1485,32 +1485,55 @@ if (
   !text.includes("мои")
 ) {
 
-  global.lastOberegTime =
-    global.lastOberegTime || {};
+  const { data: lastData } =
+    await fetch(
+
+`${SUPABASE_URL}/rest/v1/user_oberegi?user_id=eq.${userId}&select=created_at&order=created_at.desc&limit=1`,
+
+{
+  headers: {
+    apikey: SUPABASE_KEY,
+    Authorization:
+      `Bearer ${SUPABASE_KEY}`
+  }
+}
+
+).then(r => r.json());
 
   const now =
     Date.now();
-
-  const last =
-    global.lastOberegTime[userId] || 0;
 
   const cooldown =
     24 * 60 * 60 * 1000;
 
   if (
-    now - last < cooldown
+    lastData?.length
   ) {
 
-    const hours = Math.ceil(
+    const last =
+      new Date(
+        lastData[0]
+          .created_at
+      ).getTime();
 
-      (
-        cooldown -
-        (now - last)
-      ) / 3600000
+    if (
+      now - last
+      < cooldown
+    ) {
 
-    );
+      const hours =
+        Math.ceil(
 
-    await sendMessage(
+          (
+            cooldown -
+            (
+              now - last
+            )
+          ) / 3600000
+
+        );
+
+      await sendMessage(
 
 `
 ⏳ Следующий оберег
@@ -1519,27 +1542,48 @@ if (
 ${hours} ч.
 `,
 
-      keyboard
-    );
+        keyboard
+      );
 
-    return res
-      .status(200)
-      .end();
+      return res
+        .status(200)
+        .end();
+    }
   }
 
-  global.lastOberegTime[userId] =
-    now;
+  await fetch(
 
-  global.userTalismans =
-    global.userTalismans || {};
+`${SUPABASE_URL}/rest/v1/user_oberegi`,
 
-  global.userTalismans[userId] =
-    global.userTalismans[userId] || [];
+{
+  method: "POST",
 
-  global.userTalismans[userId]
-    .push(
+  headers: {
+
+    apikey:
+      SUPABASE_KEY,
+
+    Authorization:
+      `Bearer ${SUPABASE_KEY}`,
+
+    "Content-Type":
+      "application/json",
+
+    Prefer:
+      "return=minimal"
+  },
+
+  body: JSON.stringify({
+
+    user_id:
+      userId,
+
+    obereg:
       obereg.name
-    );
+  })
+}
+
+);
 
   const fs =
     require("fs");
