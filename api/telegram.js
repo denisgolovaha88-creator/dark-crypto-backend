@@ -1485,40 +1485,39 @@ if (
   !text.includes("мои")
 ) {
 
-  const lastData =
-    await fetch(
-
-`${SUPABASE_URL}/rest/v1/user_oberegi?user_id=eq.${userId}&select=created_at&order=created_at.desc&limit=1`,
-
-{
-  headers: {
-    apikey: SUPABASE_KEY,
-    Authorization:
-      `Bearer ${SUPABASE_KEY}`
-  }
-}
-
-).then(r => r.json());
+  const { data: lastData } =
+    await supabase
+      .from("user_oberegi")
+      .select("created_at")
+      .eq(
+        "user_id",
+        String(userId)
+      )
+      .order(
+        "created_at",
+        { ascending: false }
+      )
+      .limit(1);
 
   const cooldown =
     24 * 60 * 60 * 1000;
 
   if (
-    lastData.length
+    lastData &&
+    lastData.length > 0
   ) {
 
     const lastTime =
       new Date(
-        lastData[0]
-          .created_at
+        lastData[0].created_at
       ).getTime();
 
-    const diff =
-      Date.now() -
-      lastTime;
+    const now =
+      Date.now();
 
     if (
-      diff < cooldown
+      now - lastTime <
+      cooldown
     ) {
 
       const hours =
@@ -1526,7 +1525,9 @@ if (
 
           (
             cooldown -
-            diff
+            (
+              now - lastTime
+            )
           ) / 3600000
 
         );
@@ -1549,39 +1550,17 @@ ${hours} ч.
     }
   }
 
-  await fetch(
+  await supabase
+    .from("user_oberegi")
+    .insert([
+      {
+        user_id:
+          String(userId),
 
-`${SUPABASE_URL}/rest/v1/user_oberegi`,
-
-{
-  method: "POST",
-
-  headers: {
-
-    apikey:
-      SUPABASE_KEY,
-
-    Authorization:
-      `Bearer ${SUPABASE_KEY}`,
-
-    "Content-Type":
-      "application/json",
-
-    Prefer:
-      "return=minimal"
-  },
-
-  body: JSON.stringify({
-
-    user_id:
-      String(userId),
-
-    obereg:
-      obereg.name
-  })
-}
-
-);
+        obereg:
+          obereg.name
+      }
+    ]);
 
   const fs =
     require("fs");
@@ -1651,14 +1630,13 @@ ${obereg.rarity}
 
   await fetch(
 
-`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`,
+    `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`,
 
-{
-  method: "POST",
-  body: formData
-}
-
-);
+    {
+      method: "POST",
+      body: formData
+    }
+  );
 
   return res
     .status(200)
@@ -1673,22 +1651,19 @@ if (
   text.includes("мои обереги")
 ) {
 
-  const list =
-    await fetch(
+  const { data } =
+    await supabase
+      .from("user_oberegi")
+      .select("*")
+      .eq(
+        "user_id",
+        String(userId)
+      );
 
-`${SUPABASE_URL}/rest/v1/user_oberegi?user_id=eq.${userId}&select=obereg`,
-
-{
-  headers: {
-    apikey: SUPABASE_KEY,
-    Authorization:
-      `Bearer ${SUPABASE_KEY}`
-  }
-}
-
-).then(r => r.json());
-
-  if (!list.length) {
+  if (
+    !data ||
+    data.length === 0
+  ) {
 
     await sendMessage(
 
@@ -1704,16 +1679,21 @@ if (
       .end();
   }
 
+  const list =
+    data
+      .map(
+        x => `🔮 ${x.obereg}`
+      )
+      .join("\n");
+
   await sendMessage(
 
 `
-📜 ТВОИ ОБЕРЕГИ
+📜 МОИ ОБЕРЕГИ
 
 ━━━━━━━━━━
 
-${list
-  .map(x => x.obereg)
-  .join("\n")}
+${list}
 `,
 
     keyboard
