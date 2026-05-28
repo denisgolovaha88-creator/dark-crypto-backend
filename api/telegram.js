@@ -1492,75 +1492,44 @@ const talisman =
 // ==================================================
 
 if (
-  text.includes("оберег")
-  &&
+  text.includes("оберег") &&
   !text.includes("мои")
 ) {
 
-  const { data } =
-  await supabase
-    .from("user_oberegi")
-    .select("*")
-    .eq(
-      "user_id",
-      `${userId}`
-    );
-console.log(data);
-      .order(
-        "created_at",
-        { ascending: false }
+  const { data: existing } =
+    await supabase
+      .from("user_oberegi")
+      .select("*")
+      .eq(
+        "user_id",
+        String(userId)
       )
-      .limit(1)
-
-  const cooldown =
-    24 * 60 * 60 * 1000;
-
-  if (
-    lastData &&
-    lastData.length > 0
-  ) {
-
-    const lastTime =
-      new Date(
-        lastData[0].created_at
-      ).getTime();
-
-    const now =
-      Date.now();
-
-    if (
-      now - lastTime <
-      cooldown
-    ) {
-
-      const hours =
-        Math.ceil(
-
-          (
-            cooldown -
-            (
-              now - lastTime
-            )
-          ) / 3600000
-
-        );
-
-      await sendMessage(
-
-`
-⏳ Следующий оберег
-будет доступен через:
-
-${hours} ч.
-`,
-
-        keyboard
+      .gte(
+        "created_at",
+        new Date(
+          Date.now() -
+          24 * 60 * 60 * 1000
+        ).toISOString()
       );
 
-      return res
-        .status(200)
-        .end();
-    }
+  if (
+    existing &&
+    existing.length > 0
+  ) {
+
+    await sendMessage(
+
+`
+⏳ Сегодня ты уже получил оберег.
+Попробуй позже.
+`,
+
+      keyboard
+    );
+
+    return res
+      .status(200)
+      .end();
   }
 
   await supabase
