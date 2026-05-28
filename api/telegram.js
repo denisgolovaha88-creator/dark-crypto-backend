@@ -1485,7 +1485,7 @@ if (
   !text.includes("мои")
 ) {
 
-  const { data: lastData } =
+  const lastData =
     await fetch(
 
 `${SUPABASE_URL}/rest/v1/user_oberegi?user_id=eq.${userId}&select=created_at&order=created_at.desc&limit=1`,
