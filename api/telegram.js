@@ -1496,32 +1496,47 @@ if (
   !text.includes("мои")
 ) {
 
-  const { data: existing } =
-    await supabase
-      .from("user_oberegi")
-      .select("*")
-      .eq(
-        "user_id",
-        String(userId)
-      )
-      .gte(
-        "created_at",
-        new Date(
-          Date.now() -
-          24 * 60 * 60 * 1000
-        ).toISOString()
-      );
+  global.userCooldowns =
+    global.userCooldowns || {};
+
+  const now =
+    Date.now();
+
+  const cooldown =
+    24 * 60 * 60 * 1000;
+
+  const lastOpen =
+    global.userCooldowns[userId] || 0;
+
+  // ============================================
+  // CHECK COOLDOWN
+  // ============================================
 
   if (
-    existing &&
-    existing.length > 0
+    now - lastOpen <
+    cooldown
   ) {
+
+    const hours =
+      Math.ceil(
+
+        (
+          cooldown -
+          (
+            now - lastOpen
+          )
+        ) / 3600000
+
+      );
 
     await sendMessage(
 
 `
-⏳ Сегодня ты уже получил оберег.
-Попробуй позже.
+⏳ Ты уже получил оберег.
+
+Следующий будет доступен через:
+
+${hours} ч.
 `,
 
       keyboard
@@ -1532,17 +1547,31 @@ if (
       .end();
   }
 
-  await supabase
-    .from("user_oberegi")
-    .insert([
-      {
-        user_id:
-          String(userId),
+  // ============================================
+  // SAVE TIME
+  // ============================================
 
-        obereg:
-          obereg.name
-      }
-    ]);
+  global.userCooldowns[userId] =
+    now;
+
+  // ============================================
+  // SAVE OBERIG
+  // ============================================
+
+  global.userTalismans =
+    global.userTalismans || {};
+
+  global.userTalismans[userId] =
+    global.userTalismans[userId] || [];
+
+  global.userTalismans[userId]
+    .push(
+      obereg.name
+    );
+
+  // ============================================
+  // SEND IMAGE
+  // ============================================
 
   const fs =
     require("fs");
