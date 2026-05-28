@@ -54,6 +54,18 @@ const path =
 
 const fetch = global.fetch;
 
+const {
+  createClient
+} = require(
+  "@supabase/supabase-js"
+);
+
+const supabase =
+  createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
 // ======================================================
 // GLOBAL CACHE
 // ======================================================
