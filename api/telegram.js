@@ -1500,25 +1500,25 @@ if (
 
 ).then(r => r.json());
 
-  const now =
-    Date.now();
-
   const cooldown =
     24 * 60 * 60 * 1000;
 
   if (
-    lastData?.length
+    lastData.length
   ) {
 
-    const last =
+    const lastTime =
       new Date(
         lastData[0]
           .created_at
       ).getTime();
 
+    const diff =
+      Date.now() -
+      lastTime;
+
     if (
-      now - last
-      < cooldown
+      diff < cooldown
     ) {
 
       const hours =
@@ -1526,9 +1526,7 @@ if (
 
           (
             cooldown -
-            (
-              now - last
-            )
+            diff
           ) / 3600000
 
         );
@@ -1576,7 +1574,7 @@ ${hours} ч.
   body: JSON.stringify({
 
     user_id:
-      userId,
+      String(userId),
 
     obereg:
       obereg.name
@@ -1653,13 +1651,14 @@ ${obereg.rarity}
 
   await fetch(
 
-    `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`,
+`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`,
 
-    {
-      method: "POST",
-      body: formData
-    }
-  );
+{
+  method: "POST",
+  body: formData
+}
+
+);
 
   return res
     .status(200)
