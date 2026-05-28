@@ -1675,7 +1675,19 @@ if (
 ) {
 
   const list =
-    global.userTalismans?.[userId] || [];
+    await fetch(
+
+`${SUPABASE_URL}/rest/v1/user_oberegi?user_id=eq.${userId}&select=obereg`,
+
+{
+  headers: {
+    apikey: SUPABASE_KEY,
+    Authorization:
+      `Bearer ${SUPABASE_KEY}`
+  }
+}
+
+).then(r => r.json());
 
   if (!list.length) {
 
@@ -1700,7 +1712,9 @@ if (
 
 ━━━━━━━━━━
 
-${list.join("\n")}
+${list
+  .map(x => x.obereg)
+  .join("\n")}
 `,
 
     keyboard
