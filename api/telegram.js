@@ -1510,7 +1510,7 @@ console.log(data);
         "created_at",
         { ascending: false }
       )
-      .limit(1);
+      .limit(1)
 
   const cooldown =
     24 * 60 * 60 * 1000;
