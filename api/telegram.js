@@ -1499,60 +1499,39 @@ if (
   global.userCooldowns =
     global.userCooldowns || {};
 
-  const now =
-    Date.now();
+  const today =
+  new Date()
+    .toISOString()
+    .slice(0, 10);
 
-  const cooldown =
-    24 * 60 * 60 * 1000;
+global.userCooldowns =
+  global.userCooldowns || {};
 
-  const lastOpen =
-    global.userCooldowns[userId] || 0;
+const lastDay =
+  global.userCooldowns[userId];
 
-  // ============================================
-  // CHECK COOLDOWN
-  // ============================================
+if (
+  lastDay === today
+) {
 
-  if (
-    now - lastOpen <
-    cooldown
-  ) {
-
-    const hours =
-      Math.ceil(
-
-        (
-          cooldown -
-          (
-            now - lastOpen
-          )
-        ) / 3600000
-
-      );
-
-    await sendMessage(
+  await sendMessage(
 
 `
-⏳ Ты уже получил оберег.
+⏳ Сегодня ты уже получил оберег.
 
-Следующий будет доступен через:
-
-${hours} ч.
+Возвращайся завтра.
 `,
 
-      keyboard
-    );
+    keyboard
+  );
 
-    return res
-      .status(200)
-      .end();
-  }
+  return res
+    .status(200)
+    .end();
+}
 
-  // ============================================
-  // SAVE TIME
-  // ============================================
-
-  global.userCooldowns[userId] =
-    now;
+global.userCooldowns[userId] =
+  today;
 
   // ============================================
   // SAVE OBERIG
