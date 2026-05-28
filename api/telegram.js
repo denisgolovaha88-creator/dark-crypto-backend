@@ -1497,14 +1497,15 @@ if (
   !text.includes("мои")
 ) {
 
-  const { data: lastData } =
-    await supabase
-      .from("user_oberegi")
-      .select("created_at")
-      .eq(
-        "user_id",
-        String(userId)
-      )
+  const { data } =
+  await supabase
+    .from("user_oberegi")
+    .select("*")
+    .eq(
+      "user_id",
+      `${userId}`
+    );
+console.log(data);
       .order(
         "created_at",
         { ascending: false }
