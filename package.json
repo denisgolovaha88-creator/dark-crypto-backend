@@ -1,0 +1,25 @@
+{
+  "name": "dark-crypto-backend",
+  "version": "1.0.0",
+  "description": "update",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/denisgolovaha88-creator/dark-crypto-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/denisgolovaha88-creator/dark-crypto-backend/issues"
+  },
+  "homepage": "https://github.com/denisgolovaha88-creator/dark-crypto-backend#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.106.2",
+    "sharp": "^0.34.5"
+  }
+}
