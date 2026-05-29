@@ -163,6 +163,44 @@ async function sendAlert(
 }
 
 // ==================================================
+// CACHE
+// ==================================================
+
+async function getCached(
+  key,
+  ttl,
+  loader
+) {
+
+  const now =
+    Date.now();
+
+  const cached =
+    global.marketCache[key];
+
+  if (
+    cached &&
+    now - cached.time < ttl
+  ) {
+
+    return cached.data;
+  }
+
+  const data =
+    await loader();
+
+  global.marketCache[key] = {
+
+    time:
+      now,
+
+    data
+  };
+
+  return data;
+}
+
+// ==================================================
 // OHLC
 // ==================================================
 
@@ -714,44 +752,6 @@ if (
 
         throw e;
       }
-    }
-
-    // ==================================================
-    // CACHE
-    // ==================================================
-
-    async function getCached(
-      key,
-      ttl,
-      loader
-    ) {
-
-      const now =
-        Date.now();
-
-      const cached =
-        global.marketCache[key];
-
-      if (
-        cached &&
-        now - cached.time < ttl
-      ) {
-
-        return cached.data;
-      }
-
-      const data =
-        await loader();
-
-      global.marketCache[key] = {
-
-        time:
-          now,
-
-        data
-      };
-
-      return data;
     }
 
     // ==================================================
