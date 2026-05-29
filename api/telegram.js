@@ -163,6 +163,36 @@ async function sendAlert(
 }
 
 // ==================================================
+// SAFE FETCH
+// ==================================================
+
+async function safeFetch(
+  url,
+  options = {}
+) {
+
+  try {
+
+    const r =
+      await fetch(
+        url,
+        options
+      );
+
+    return r;
+
+  } catch (e) {
+
+    console.log(
+      "FETCH ERROR",
+      e
+    );
+
+    throw e;
+  }
+}
+
+// ==================================================
 // CACHE
 // ==================================================
 
@@ -721,36 +751,6 @@ if (
           "PHOTO ERROR",
           e
         );
-      }
-    }
-
-    // ==================================================
-    // SAFE FETCH
-    // ==================================================
-
-    async function safeFetch(
-      url,
-      options = {}
-    ) {
-
-      try {
-
-        const r =
-          await fetch(
-            url,
-            options
-          );
-
-        return r;
-
-      } catch (e) {
-
-        console.log(
-          "FETCH ERROR",
-          e
-        );
-
-        throw e;
       }
     }
 
