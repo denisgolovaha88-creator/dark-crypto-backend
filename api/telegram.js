@@ -1470,6 +1470,13 @@ const oberegi = [
   },
 
   {
+   name: "SOVA TOTEM",
+   power: "Мудрость времён",
+   rarity: "Редкий",
+   file: "sova-totem.png"
+  },
+
+  {
     file: "chaos-ember.png",
     name: "CHAOS EMBER",
     power: "Усиливает агрессивные входы.",
