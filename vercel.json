@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/telegram?cron=sol-alert",
-      "schedule": "*/15 * * * *"
+      "schedule": "*/25 * * * *"
     }
   ]
 }
