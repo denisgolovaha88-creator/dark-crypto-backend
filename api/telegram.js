@@ -285,10 +285,10 @@ async function checkSOLSignal() {
     // ==================================================
 
     const bullish =
-      ema20 > ema50;
+      ema20 >= ema50;
 
     const oversold =
-      rsi < 55;
+      rsi < 65;
 
     console.log({
   ema20,
