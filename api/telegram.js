@@ -161,6 +161,32 @@ async function sendAlert(
     );
   }
 }
+
+// ==================================================
+// OHLC
+// ==================================================
+
+async function getOHLC(id) {
+
+  return await getCached(
+
+    `ohlc_${id}`,
+
+    60000,
+
+    async () => {
+
+      const r =
+        await safeFetch(
+          `https://api.coingecko.com/api/v3/coins/${id}/ohlc?vs_currency=usd&days=1`
+        );
+
+      return await r.json();
+    }
+  );
+}
+
+
 // ==================================================
 // CHECK SOL SIGNAL
 // ==================================================
@@ -859,30 +885,6 @@ if (
 
             return [];
           }
-        }
-      );
-    }
-
-    // ==================================================
-    // OHLC
-    // ==================================================
-
-    async function getOHLC(id) {
-
-      return await getCached(
-
-        `ohlc_${id}`,
-
-        60000,
-
-        async () => {
-
-          const r =
-            await safeFetch(
-              `https://api.coingecko.com/api/v3/coins/${id}/ohlc?vs_currency=usd&days=1`
-            );
-
-          return await r.json();
         }
       );
     }
