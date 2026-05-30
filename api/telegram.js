@@ -1565,6 +1565,13 @@ global.userCooldowns[userId] =
       obereg.name
     );
 
+  await supabase
+  .from("user_oberegi")
+  .insert({
+    user_id: String(userId),
+    obereg: obereg.name
+  });
+
   // ============================================
   // SEND IMAGE
   // ============================================
