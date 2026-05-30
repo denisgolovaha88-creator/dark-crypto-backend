@@ -1565,6 +1565,12 @@ global.userCooldowns[userId] =
       obereg.name
     );
 
+  console.log(
+  "OBEREG START",
+  userId,
+  obereg.name
+);
+
   const { data, error } =
   await supabase
     .from("user_oberegi")
