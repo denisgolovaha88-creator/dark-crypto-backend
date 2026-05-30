@@ -1576,7 +1576,10 @@ global.userCooldowns[userId] =
     .from("user_oberegi")
     .insert({
       user_id: String(userId),
-      obereg: obereg.name
+      obereg: obereg.name,
+      created_at:
+        new Date()
+          .toISOString()
     });
 
 console.log(
