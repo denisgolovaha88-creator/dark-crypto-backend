@@ -1513,25 +1513,32 @@ if (
   !text.includes("мои")
 ) {
 
-  global.userCooldowns =
-    global.userCooldowns || {};
-
   const today =
-  new Date()
-    .toISOString()
-    .slice(0, 10);
+    new Date()
+      .toISOString()
+      .slice(0, 10);
 
-global.userCooldowns =
-  global.userCooldowns || {};
+  const {
+    data: todayOberegi
+  } =
+    await supabase
+      .from("user_oberegi")
+      .select("id")
+      .eq(
+        "user_id",
+        String(userId)
+      )
+      .gte(
+        "created_at",
+        `${today}T00:00:00`
+      );
 
-const lastDay =
-  global.userCooldowns[userId];
+  if (
+    todayOberegi &&
+    todayOberegi.length > 0
+  ) {
 
-if (
-  lastDay === today
-) {
-
-  await sendMessage(
+    await sendMessage(
 
 `
 ⏳ Сегодня ты уже получил оберег.
@@ -1539,16 +1546,13 @@ if (
 Возвращайся завтра.
 `,
 
-    keyboard
-  );
+      keyboard
+    );
 
-  return res
-    .status(200)
-    .end();
-}
-
-global.userCooldowns[userId] =
-  today;
+    return res
+      .status(200)
+      .end();
+  }
 
   // ============================================
   // SAVE OBERIG
