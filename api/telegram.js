@@ -1892,38 +1892,59 @@ if (
 // ORACLE ALERTS
 // ==================================================
 
-async function saveAlertSubscription(
+async function toggleAlertSubscription(
   userId
 ) {
 
-  try {
+  const { data } =
+    await supabase
+      .from("oracle_alerts")
+      .select("*")
+      .eq(
+        "telegram_id",
+        String(userId)
+      );
 
-    await supabaseInsert(
-      "oracle_alerts",
-      {
+  if (
+    data &&
+    data.length > 0
+  ) {
 
-        telegram_id:
-          userId,
+    const current =
+      data[0];
 
-        coin:
-          "SOL",
+    const newState =
+      !current.active;
 
-        active:
-          true,
+    await supabase
+      .from("oracle_alerts")
+      .update({
+        active: newState
+      })
+      .eq(
+        "id",
+        current.id
+      );
 
-        created_at:
-          new Date()
-            .toISOString()
-      }
-    );
-
-  } catch (e) {
-
-    console.log(
-      "ALERT SAVE ERROR",
-      e
-    );
+    return newState;
   }
+
+  await supabase
+    .from("oracle_alerts")
+    .insert({
+      telegram_id:
+        String(userId),
+
+      coin: "SOL",
+
+      active: true,
+
+      created_at:
+        new Date()
+          .toISOString()
+    });
+
+  return true;
 }
 
 // ==================================================
@@ -1934,34 +1955,45 @@ if (
   text.includes("сигнал")
 ) {
 
-  await saveAlertSubscription(
-    userId
-  );
+  const active =
+    await toggleAlertSubscription(
+      userId
+    );
 
-  await sendMessage(
+  if (active) {
+
+    await sendMessage(
 
 `
 🌌 ORACLE ALERT АКТИВИРОВАН
 
 ━━━━━━━━━━
 
-🔮 Потоки эфира
-начали наблюдение
-за SOLANA.
+🔮 Потоки эфира начали наблюдение за SOLANA.
 
-Когда появится
-сильная точка входа —
-оракул призовёт тебя.
+⚡ Сигналы включены.
+`,
+
+      keyboard
+    );
+
+  } else {
+
+    await sendMessage(
+
+`
+🔕 ORACLE ALERT ОТКЛЮЧЕН
 
 ━━━━━━━━━━
 
-⚠️ Ты получишь сигнал
-только когда рынок
-действительно будет готов.
+⚫ Потоки эфира больше не будут присылать сигналы.
+
+⚠️ Сигналы выключены.
 `,
 
-    keyboard
-  );
+      keyboard
+    );
+  }
 
   return res
     .status(200)
