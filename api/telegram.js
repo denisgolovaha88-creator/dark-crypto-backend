@@ -389,22 +389,19 @@ async function checkSOLSignal() {
       );
 
     const entry1 =
-      (
-        support + 0.3
-      ).toFixed(2);
+  support + 0.3;
 
-    const entry2 =
-      (
-        support + 1.2
-      ).toFixed(2);
+const entry2 =
+  support + 1.2;
 
-    const target =
-      resistance.toFixed(2);
+const target =
+  Math.max(
+    resistance,
+    entry2 + 1
+  );
 
-    const stop =
-      (
-        support - 2
-      ).toFixed(2);
+const stop =
+  support - 2;
 
     const confidence =
       Math.min(
