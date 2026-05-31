@@ -499,13 +499,13 @@ ${confidence}%
 ━━━━━━━━━━
 
 🎯 Вход:
-$${entry1} - $${entry2}
+$${entry1.toFixed(2)} - $${entry2.toFixed(2)}
 
 💎 Фиксация:
-$${target}
+$${target.toFixed(2)}
 
 🛡 Стоп:
-$${stop}
+$${stop.toFixed(2)}
 
 ━━━━━━━━━━
 
