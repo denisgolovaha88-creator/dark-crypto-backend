@@ -353,10 +353,18 @@ async function checkSOLSignal() {
     // ==================================================
 
     const bullish =
-      ema20 >= ema50;
+  ema20 > ema50;
 
-    const oversold =
-      rsi < 65;
+const oversold =
+  rsi < 35;
+
+const support =
+  Math.min(
+    ...lows.slice(-20)
+  );
+
+const nearSupport =
+  price <= support * 1.01;
 
     console.log({
   ema20,
@@ -367,12 +375,13 @@ async function checkSOLSignal() {
 });
 
     if (
-      !bullish ||
-      !oversold
-    ) {
+  !bullish ||
+  !oversold ||
+  !nearSupport
+) {
 
-      return;
-    }
+  return;
+}
 
     // ==================================================
     // LEVELS
