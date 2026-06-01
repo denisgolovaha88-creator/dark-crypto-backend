@@ -412,18 +412,22 @@ const target =
 const stop =
   support - 2;
 
-    const confidence =
-      Math.min(
-        97,
-        Math.floor(
-          70 +
-          (
-            Math.abs(
-              ema20 - ema50
-            ) / price
-          ) * 1000
-        )
-      );
+    let confidence = 50;
+
+if (bullish)
+  confidence += 15;
+
+if (oversold)
+  confidence += 20;
+
+if (nearSupport)
+  confidence += 15;
+
+confidence =
+  Math.min(
+    confidence,
+    95
+  );
 
     // ==================================================
     // ALERT USERS
