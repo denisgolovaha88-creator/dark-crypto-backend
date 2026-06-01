@@ -393,11 +393,15 @@ const nearSupport =
 const trendStrength =
   (ema20 - ema50) / price;
 
+    const emaDistance =
+  ((price - ema20) / price) * 100;
+
 if (
   !bullish ||
   !oversold ||
   !nearSupport ||
-  trendStrength < 0.01
+  trendStrength < 0.02 ||
+  emaDistance < -1
 ) {
   return;
 }
@@ -426,22 +430,22 @@ const target =
 const stop =
   support - 2;
 
-    let confidence = 50;
+    let confidence = 55;
 
 if (bullish)
-  confidence += 15;
+  confidence += 10;
 
 if (oversold)
-  confidence += 20;
+  confidence += 10;
 
 if (nearSupport)
-  confidence += 15;
+  confidence += 10;
 
-confidence =
-  Math.min(
-    confidence,
-    95
-  );
+if (trendStrength > 0.03)
+  confidence += 10;
+
+if (rsi < 25)
+  confidence += 5;
 
     // ==================================================
     // ALERT USERS
