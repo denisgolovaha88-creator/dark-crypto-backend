@@ -2238,8 +2238,11 @@ if (symbol) {
   const lows =
     candles.map(c => c[3]);
 
-  const price =
-    closes.at(-1);
+  const livePrices =
+  await getPrices();
+
+const price =
+  livePrices[symbol].usd;
 
   // ================================================
   // INDICATORS
