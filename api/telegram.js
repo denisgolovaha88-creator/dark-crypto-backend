@@ -410,11 +410,6 @@ const nearSupport =
     // LEVELS
     // ==================================================
 
-    const support =
-      Math.min(
-        ...lows.slice(-20)
-      );
-
     const resistance =
       Math.max(
         ...highs.slice(-20)
