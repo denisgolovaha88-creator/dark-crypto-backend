@@ -257,6 +257,31 @@ async function getOHLC(id) {
   );
 }
 
+// ==================================================
+// EMA
+// ==================================================
+
+function EMA(data, period) {
+
+  const k =
+    2 / (period + 1);
+
+  let ema =
+    data[0];
+
+  for (
+    let i = 1;
+    i < data.length;
+    i++
+  ) {
+
+    ema =
+      data[i] * k +
+      ema * (1 - k);
+  }
+
+  return ema;
+}
 
 // ==================================================
 // CHECK SOL SIGNAL
@@ -320,21 +345,11 @@ if (
     // SIMPLE EMA
     // ==================================================
 
-    const ema20 =
-      closes
-        .slice(-20)
-        .reduce(
-          (a, b) => a + b,
-          0
-        ) / 20;
+       const ema20 =
+     EMA(closes, 20);
 
-    const ema50 =
-      closes
-        .slice(-50)
-        .reduce(
-          (a, b) => a + b,
-          0
-        ) / 50;
+       const ema50 =
+     EMA(closes, 50);
 
     // ==================================================
     // RSI
