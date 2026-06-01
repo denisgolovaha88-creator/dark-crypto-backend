@@ -376,7 +376,8 @@ if (
     // ==================================================
 
     const bullish =
-  ema20 > ema50;
+  ema20 > ema50 &&
+  ema20 > closes[closes.length - 2];
 
 const oversold =
   rsi < 30;
@@ -389,24 +390,15 @@ const support =
 const nearSupport =
   price <= support * 1.01;
 
-    const trendStrength =
+const trendStrength =
   (ema20 - ema50) / price;
 
-    console.log({
-  ema20,
-  ema50,
-  rsi,
-  bullish,
-  oversold
-});
-
-    if (
+if (
   !bullish ||
   !oversold ||
   !nearSupport ||
-  trendStrength < 0.02
+  trendStrength < 0.01
 ) {
-
   return;
 }
 
