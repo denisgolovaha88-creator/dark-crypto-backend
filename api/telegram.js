@@ -79,6 +79,9 @@ global.userCooldowns =
 global.userRunes =
   global.userRunes || {};
 
+global.lastSignals =
+  global.lastSignals || {};
+
 // ==================================================
 // ORACLE ALERT ENGINE
 // ==================================================
@@ -293,6 +296,26 @@ async function checkSOLSignal() {
     const price =
       closes.at(-1);
 
+    const now =
+  Date.now();
+
+if (
+
+  global.lastSignals.sol &&
+
+  now -
+  global.lastSignals.sol <
+  6 * 60 * 60 * 1000
+
+) {
+
+  console.log(
+    "SIGNAL COOLDOWN"
+  );
+
+  return;
+}
+
     // ==================================================
     // SIMPLE EMA
     // ==================================================
@@ -483,6 +506,9 @@ confidence =
     // SEND
     // ==================================================
 
+      global.lastSignals.sol =
+    Date.now();
+    
     for (
       const u of users
     ) {
