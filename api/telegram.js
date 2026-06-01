@@ -408,6 +408,15 @@ const nearSupport =
 const trendStrength =
   (ema20 - ema50) / price;
 
+    const lastClose =
+  closes[closes.length - 1];
+
+const prevClose =
+  closes[closes.length - 2];
+
+const reversal =
+  lastClose > prevClose;
+
     const emaDistance =
   ((price - ema20) / price) * 100;
 
@@ -415,6 +424,7 @@ if (
   !bullish ||
   !oversold ||
   !nearSupport ||
+  !reversal ||
   trendStrength < 0.02 ||
   emaDistance < -1
 ) {
