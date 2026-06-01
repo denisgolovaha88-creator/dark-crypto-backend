@@ -318,8 +318,11 @@ async function checkSOLSignal() {
         c => c[3]
       );
 
-    const price =
-      closes.at(-1);
+    const livePriceData =
+  await getPrices();
+
+const price =
+  livePriceData.solana.usd;
 
     const now =
   Date.now();
